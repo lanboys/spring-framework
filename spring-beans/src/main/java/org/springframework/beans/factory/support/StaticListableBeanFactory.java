@@ -16,12 +16,6 @@
 
 package org.springframework.beans.factory.support;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactoryUtils;
@@ -37,6 +31,12 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Static {@link org.springframework.beans.factory.BeanFactory} implementation
@@ -122,6 +122,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 
 		if (bean instanceof FactoryBean && !BeanFactoryUtils.isFactoryDereference(name)) {
 			try {
+				// 如果是 FactoryBean 就调用 getObject()
 				return ((FactoryBean<?>) bean).getObject();
 			}
 			catch (Exception ex) {
@@ -266,12 +267,15 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 			String name = entry.getKey();
 			Object beanInstance = entry.getValue();
 			if (beanInstance instanceof FactoryBean && !isFactoryType) {
+				// FactoryBean 里面的 Object
 				Class<?> objectType = ((FactoryBean<?>) beanInstance).getObjectType();
 				if (objectType != null && (type == null || type.isAssignableFrom(objectType))) {
 					matches.add(name);
 				}
 			}
 			else {
+				// 普通的 bean
+				// type == FactoryBean.class 走的是这里
 				if (type == null || type.isInstance(beanInstance)) {
 					matches.add(name);
 				}
@@ -308,7 +312,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 			Object beanInstance = entry.getValue();
 			// Is bean a FactoryBean?
 			if (beanInstance instanceof FactoryBean && !isFactoryType) {
-				// Match object created by FactoryBean.
+				// Match object created by FactoryBean. 获取 FactoryBean 里面的 Object
 				FactoryBean<?> factory = (FactoryBean<?>) beanInstance;
 				Class<?> objectType = factory.getObjectType();
 				if ((includeNonSingletons || factory.isSingleton()) &&
@@ -321,6 +325,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 					// If type to match is FactoryBean, return FactoryBean itself.
 					// Else, return bean instance.
 					if (isFactoryType) {
+						// 如果是 FactoryBean.class, 则需要复原 beanName 的前缀 &
 						beanName = FACTORY_BEAN_PREFIX + beanName;
 					}
 					matches.put(beanName, (T) beanInstance);

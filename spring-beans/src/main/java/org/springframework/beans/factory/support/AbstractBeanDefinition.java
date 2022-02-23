@@ -16,13 +16,6 @@
 
 package org.springframework.beans.factory.support;
 
-import java.lang.reflect.Constructor;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.springframework.beans.BeanMetadataAttributeAccessor;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
@@ -34,6 +27,13 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+
+import java.lang.reflect.Constructor;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Base class for concrete, full-fledged {@link BeanDefinition} classes,
@@ -123,6 +123,9 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	public static final int DEPENDENCY_CHECK_ALL = 3;
 
 	/**
+	 * 注解Bean的destroyMethod默认值就是这个，意思是自动判断bean是否需要销毁
+	 * 目前，如果bean中有 close/shutdown 方法就会自动销毁
+	 *
 	 * Constant that indicates the container should attempt to infer the
 	 * {@link #setDestroyMethodName destroy method name} for a bean as opposed to
 	 * explicit specification of a method name. The value {@value} is specifically

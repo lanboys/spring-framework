@@ -16,19 +16,8 @@
 
 package org.springframework.beans.factory.support;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanCreationNotAllowedException;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
@@ -38,6 +27,16 @@ import org.springframework.beans.factory.config.SingletonBeanRegistry;
 import org.springframework.core.SimpleAliasRegistry;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Generic registry for shared bean instances, implementing the
@@ -473,6 +472,8 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 * Return the names of all beans which depend on the specified bean, if any.
 	 * @param beanName the name of the bean
 	 * @return the array of dependent bean names, or an empty array if none
+	 *
+	 * 获取依赖了beanName的 bean names, beanName是被依赖的对象
 	 */
 	public String[] getDependentBeans(String beanName) {
 		Set<String> dependentBeans = this.dependentBeanMap.get(beanName);

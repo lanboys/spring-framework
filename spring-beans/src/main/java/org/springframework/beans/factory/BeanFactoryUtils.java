@@ -16,16 +16,16 @@
 
 package org.springframework.beans.factory;
 
+import org.springframework.beans.BeansException;
+import org.springframework.core.ResolvableType;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.springframework.beans.BeansException;
-import org.springframework.core.ResolvableType;
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * Convenience methods operating on bean factories, in particular
@@ -67,6 +67,8 @@ public abstract class BeanFactoryUtils {
 	 * @param name the name of the bean
 	 * @return the transformed name
 	 * @see BeanFactory#FACTORY_BEAN_PREFIX
+	 *
+	 * 获取真实的 beanName, 因为 FactoryBean 会带前缀 &
 	 */
 	public static String transformedBeanName(String name) {
 		Assert.notNull(name, "'name' must not be null");
@@ -111,6 +113,8 @@ public abstract class BeanFactoryUtils {
 	 * with the same name) are only counted once.
 	 * @param lbf the bean factory
 	 * @return count of beans including those defined in ancestor factories
+	 *
+	 * 统计Beans的数量，包括 parent bean factory
 	 */
 	public static int countBeansIncludingAncestors(ListableBeanFactory lbf) {
 		return beanNamesIncludingAncestors(lbf).length;
@@ -167,10 +171,11 @@ public abstract class BeanFactoryUtils {
 	 */
 	public static String[] beanNamesForTypeIncludingAncestors(ListableBeanFactory lbf, Class<?> type) {
 		Assert.notNull(lbf, "ListableBeanFactory must not be null");
-		String[] result = lbf.getBeanNamesForType(type);
+		String[] result = lbf.getBeanNamesForType(type);//getBeanNamesForType 不含parent factory中的bean
 		if (lbf instanceof HierarchicalBeanFactory) {
 			HierarchicalBeanFactory hbf = (HierarchicalBeanFactory) lbf;
 			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
+				// 统计 parent factory 中的bean
 				String[] parentResult = beanNamesForTypeIncludingAncestors(
 						(ListableBeanFactory) hbf.getParentBeanFactory(), type);
 				result = mergeNamesWithParent(result, parentResult, hbf);

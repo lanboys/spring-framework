@@ -16,11 +16,11 @@
 
 package org.springframework.beans.factory;
 
-import java.lang.annotation.Annotation;
-import java.util.Map;
-
 import org.springframework.beans.BeansException;
 import org.springframework.core.ResolvableType;
+
+import java.lang.annotation.Annotation;
+import java.util.Map;
 
 /**
  * Extension of the {@link BeanFactory} interface to be implemented by bean factories
@@ -232,6 +232,9 @@ public interface ListableBeanFactory extends BeanFactory {
 	 * "factory-bean" reference) for the type check. Note that FactoryBeans need to be
 	 * eagerly initialized to determine their type: So be aware that passing in "true"
 	 * for this flag will initialize FactoryBeans and "factory-bean" references.
+	 *
+	 *  类型检查的时候是否允许初始化实例  懒加载的单例、FactoryBeans 或者 factory-bean
+	 *
 	 * @return a Map with the matching beans, containing the bean names as
 	 * keys and the corresponding bean instances as values
 	 * @throws BeansException if a bean could not be created

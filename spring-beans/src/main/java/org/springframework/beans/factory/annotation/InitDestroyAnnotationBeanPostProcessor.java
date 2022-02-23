@@ -16,6 +16,18 @@
 
 package org.springframework.beans.factory.annotation;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
+import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
+import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.core.Ordered;
+import org.springframework.core.PriorityOrdered;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
@@ -29,19 +41,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
-import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
-import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.core.Ordered;
-import org.springframework.core.PriorityOrdered;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link org.springframework.beans.factory.config.BeanPostProcessor} implementation
@@ -131,6 +130,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 		LifecycleMetadata metadata = findLifecycleMetadata(bean.getClass());
 		try {
+			// 初始化前：调用bean的初始化方法
 			metadata.invokeInitMethods(bean, beanName);
 		}
 		catch (InvocationTargetException ex) {
@@ -144,6 +144,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 
 	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+		// 初始化后：这里不做处理
 		return bean;
 	}
 
@@ -151,6 +152,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 	public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
 		LifecycleMetadata metadata = findLifecycleMetadata(bean.getClass());
 		try {
+			// 调用bean的销毁方法
 			metadata.invokeDestroyMethods(bean, beanName);
 		}
 		catch (InvocationTargetException ex) {
@@ -172,7 +174,9 @@ public class InitDestroyAnnotationBeanPostProcessor
 		return findLifecycleMetadata(bean.getClass()).hasDestroyMethods();
 	}
 
-
+	/**
+	 * 获取生命周期的元数据，主要是初始化或销毁的 method
+	 */
 	private LifecycleMetadata findLifecycleMetadata(Class<?> clazz) {
 		if (this.lifecycleMetadataCache == null) {
 			// Happens after deserialization, during destruction...
@@ -193,6 +197,9 @@ public class InitDestroyAnnotationBeanPostProcessor
 		return metadata;
 	}
 
+	/**
+	 * 构建生命周期的元数据，主要是初始化或销毁的 method
+	 */
 	private LifecycleMetadata buildLifecycleMetadata(final Class<?> clazz) {
 		final boolean debug = logger.isDebugEnabled();
 		LinkedList<LifecycleElement> initMethods = new LinkedList<LifecycleElement>();

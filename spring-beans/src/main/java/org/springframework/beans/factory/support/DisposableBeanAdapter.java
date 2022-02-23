@@ -16,6 +16,18 @@
 
 package org.springframework.beans.factory.support;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
+import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
+
 import java.io.Closeable;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
@@ -27,19 +39,6 @@ import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
-import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ReflectionUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * Adapter that implements the {@link DisposableBean} and {@link Runnable}
@@ -116,6 +115,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 				(this.bean instanceof DisposableBean && !beanDefinition.isExternallyManagedDestroyMethod("destroy"));
 		this.nonPublicAccessAllowed = beanDefinition.isNonPublicAccessAllowed();
 		this.acc = acc;
+		// 获取自定义的销毁方法
 		String destroyMethodName = inferDestroyMethodIfNecessary(bean, beanDefinition);
 		if (destroyMethodName != null && !(this.invokeDisposableBean && "destroy".equals(destroyMethodName)) &&
 				!beanDefinition.isExternallyManagedDestroyMethod(destroyMethodName)) {
@@ -194,6 +194,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 				(destroyMethodName == null && closeableInterface.isInstance(bean))) {
 			// Only perform destroy method inference or Closeable detection
 			// in case of the bean not explicitly implementing DisposableBean
+				// 如果继承了DisposableBean，那就不自动推断销毁方法了，因为用户应该是在DisposableBean里面处理销毁逻辑
 			if (!(bean instanceof DisposableBean)) {
 				try {
 					return bean.getClass().getMethod(CLOSE_METHOD_NAME).getName();
@@ -250,6 +251,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	public void destroy() {
 		if (!CollectionUtils.isEmpty(this.beanPostProcessors)) {
 			for (DestructionAwareBeanPostProcessor processor : this.beanPostProcessors) {
+				// 调用@PreDestroy的销毁方法
 				processor.postProcessBeforeDestruction(this.bean, this.beanName);
 			}
 		}
@@ -269,6 +271,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 					}, acc);
 				}
 				else {
+					// 调用DisposableBean的销毁方法
 					((DisposableBean) bean).destroy();
 				}
 			}
@@ -282,7 +285,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 				}
 			}
 		}
-
+		// 调用自定义的销毁方法
 		if (this.destroyMethod != null) {
 			invokeCustomDestroyMethod(this.destroyMethod);
 		}
@@ -401,6 +404,8 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 
 
 	/**
+	 * 检查是否有销毁方法，各种类型的销毁方法都会检查
+	 *
 	 * Check whether the given bean has any kind of destroy method to call.
 	 * @param bean the bean instance
 	 * @param beanDefinition the corresponding bean definition
@@ -411,6 +416,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 		}
 		String destroyMethodName = beanDefinition.getDestroyMethodName();
 		if (AbstractBeanDefinition.INFER_METHOD.equals(destroyMethodName)) {
+			// 如果是默认值 (inferred), 那么close/shutdown就是销毁方法
 			return (ClassUtils.hasMethod(bean.getClass(), CLOSE_METHOD_NAME) ||
 					ClassUtils.hasMethod(bean.getClass(), SHUTDOWN_METHOD_NAME));
 		}

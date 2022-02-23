@@ -16,26 +16,6 @@
 
 package org.springframework.beans.factory.support;
 
-import java.beans.PropertyEditor;
-import java.security.AccessControlContext;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeansException;
@@ -76,6 +56,26 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
+
+import java.beans.PropertyEditor;
+import java.security.AccessControlContext;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Abstract base class for {@link org.springframework.beans.factory.BeanFactory}
@@ -697,7 +697,19 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 	@Override
 	public boolean containsLocalBean(String name) {
+		// name 可以是真实的beanName 也可以是 &beanName
 		String beanName = transformedBeanName(name);
+		// 先检查在不在单例里面 或者 bean 定义里面
+		//if (containsSingleton(beanName) || containsBeanDefinition(beanName)) {
+		//	// 如果在，再检查是不是FactoryBean, 为什么有这步? 比如 bean a 是普通的bean, 非 FactoryBean
+		//	// 此时 name = &a , 应该返回 false, 就是这步的作用
+		//	boolean isFactoryDereference = BeanFactoryUtils.isFactoryDereference(name);
+		//	if (isFactoryDereference) {
+		//		return isFactoryBean(beanName);
+		//	}
+		//	return true;
+		//}
+		//return false;
 		return ((containsSingleton(beanName) || containsBeanDefinition(beanName)) &&
 				(!BeanFactoryUtils.isFactoryDereference(name) || isFactoryBean(beanName)));
 	}
@@ -1119,6 +1131,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	//---------------------------------------------------------------------
 
 	/**
+	 * 去除 FactoryBean 前缀 &，然后解析别名，获取真实的 beanName
+	 * 从这里看 &a , 这个a也可能是别名
+	 *
 	 * Return the bean name, stripping out the factory dereference prefix if necessary,
 	 * and resolving aliases to canonical names.
 	 * @param name the user-specified name
@@ -1693,11 +1708,15 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				// Register a DisposableBean implementation that performs all destruction
 				// work for the given bean: DestructionAwareBeanPostProcessors,
 				// DisposableBean interface, custom destroy method.
+
+				// 单例作用域跟applicationContext一样长
+				// 注册需要销毁的bean, applicationContext销毁的时候统一进行销毁
 				registerDisposableBean(beanName,
 						new DisposableBeanAdapter(bean, beanName, mbd, getBeanPostProcessors(), acc));
 			}
 			else {
 				// A bean with a custom scope...
+				// 其他自定义的作用域
 				Scope scope = this.scopes.get(mbd.getScope());
 				if (scope == null) {
 					throw new IllegalStateException("No Scope registered for scope name '" + mbd.getScope() + "'");

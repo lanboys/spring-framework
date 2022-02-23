@@ -16,15 +16,15 @@
 
 package org.springframework.context.annotation;
 
+import org.springframework.beans.factory.annotation.Autowire;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.core.annotation.AliasFor;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import org.springframework.beans.factory.annotation.Autowire;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.core.annotation.AliasFor;
 
 /**
  * Indicates that a method produces a bean to be managed by the Spring container.
@@ -287,6 +287,13 @@ public @interface Bean {
 	 * other scope.
 	 * @see org.springframework.beans.factory.DisposableBean
 	 * @see org.springframework.context.ConfigurableApplicationContext#close()
+	 *
+	 * 销毁方法：
+	 *    默认值，且bean是非DisposableBean子类，会自动判断是否需要销毁，bean有 'close' or 'shutdown'方法就会自动销毁
+	 *    非默认值，就不会自动销毁 'close' or 'shutdown'，而是调用配置的方法进行销毁
+	 *
+	 * 逻辑在 org.springframework.beans.factory.DisposableBean#inferDestroyMethodIfNecessary()
+	 *   org.springframework.beans.factory.DisposableBean#hasDestroyMethod()
 	 */
 	String destroyMethod() default AbstractBeanDefinition.INFER_METHOD;
 

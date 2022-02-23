@@ -16,27 +16,6 @@
 
 package org.springframework.beans.factory.support;
 
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
@@ -77,6 +56,27 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
+
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Abstract bean factory superclass that implements default bean creation,
@@ -550,6 +550,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		try {
 			populateBean(beanName, mbd, instanceWrapper);
 			if (exposedObject != null) {
+				// 初始化bean, 调用各种初始化方法：PostConstruct -> afterPropertiesSet -> customInitMethod
 				exposedObject = initializeBean(beanName, exposedObject, mbd);
 			}
 		}
@@ -1603,15 +1604,20 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			}, getAccessControlContext());
 		}
 		else {
+			// 调用Aware方法, 注入相关数据
 			invokeAwareMethods(beanName, bean);
 		}
 
 		Object wrappedBean = bean;
 		if (mbd == null || !mbd.isSynthetic()) {
+			// 初始化前调用
 			wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
 		}
 
 		try {
+			// 调用初始化方法：
+			//     先调用: afterPropertiesSet (实现 InitializingBean 接口),
+			//     后调用: 自定义的init方法(xml或注解bean中配置的 initMethod)
 			invokeInitMethods(beanName, wrappedBean, mbd);
 		}
 		catch (Throwable ex) {
@@ -1620,6 +1626,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					beanName, "Invocation of init method failed", ex);
 		}
 		if (mbd == null || !mbd.isSynthetic()) {
+			// 初始化后调用
 			wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
 		}
 		return wrappedBean;
@@ -1682,6 +1689,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			String initMethodName = mbd.getInitMethodName();
 			if (initMethodName != null && !(isInitializingBean && "afterPropertiesSet".equals(initMethodName)) &&
 					!mbd.isExternallyManagedInitMethod(initMethodName)) {
+				// 调用自定义的初始化方法
 				invokeCustomInitMethod(beanName, bean, mbd);
 			}
 		}
