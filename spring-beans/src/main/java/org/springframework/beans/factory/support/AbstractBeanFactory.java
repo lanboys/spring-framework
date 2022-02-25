@@ -240,6 +240,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		Object bean;
 
 		// Eagerly check singleton cache for manually registered singletons.
+		// 查找顺序 ：singletonObjects  -->  earlySingletonObjects  -->  singletonFactories
 		Object sharedInstance = getSingleton(beanName);
 		if (sharedInstance != null && args == null) {
 			if (logger.isDebugEnabled()) {
@@ -309,7 +310,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 						@Override
 						public Object getObject() throws BeansException {
 							try {
-								return createBean(beanName, mbd, args);
+								// bean 此时已经注入好参数
+								Object bean = createBean(beanName, mbd, args);
+								return bean;
 							}
 							catch (BeansException ex) {
 								// Explicitly remove instance from singleton cache: It might have been put there

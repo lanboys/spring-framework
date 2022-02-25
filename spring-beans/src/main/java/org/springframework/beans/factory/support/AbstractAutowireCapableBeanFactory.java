@@ -123,6 +123,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
 	/** Whether to automatically try to resolve circular references between beans */
+	//是否要自动尝试解析bean之间的循环引用
 	private boolean allowCircularReferences = true;
 
 	/**
@@ -508,6 +509,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			instanceWrapper = this.factoryBeanInstanceCache.remove(beanName);
 		}
 		if (instanceWrapper == null) {
+			// 此处已经创建好bean实例
 			instanceWrapper = createBeanInstance(beanName, mbd, args);
 		}
 		final Object bean = (instanceWrapper != null ? instanceWrapper.getWrappedInstance() : null);
@@ -537,10 +539,16 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				logger.debug("Eagerly caching bean '" + beanName +
 						"' to allow for resolving potential circular references");
 			}
+			// 这里的目的是将bean缓存到 singletonFactories , 方便循环依赖的时候，后者拿到前者，比如 a b 相互依赖，
+			// a 实例化后，需要解析字段进行注入，这时发现依赖了 b，查找 b ，如果找不到，那么对 b 进行实例化，b 也
+			// 需要解析字段，发现依赖了 a，此时查找 a ，这时候就可以在缓存 singletonFactories 找到 a ，此时 b 创建成功
+			// 不过 b 依赖的 a 现在还没注入参数成功，b 创建成功后，a 也解析完成，创建成功
 			addSingletonFactory(beanName, new ObjectFactory<Object>() {
 				@Override
 				public Object getObject() throws BeansException {
-					return getEarlyBeanReference(beanName, mbd, bean);
+					// 这里的bean其实在前面已经创建好了
+					Object earlyBeanReference = getEarlyBeanReference(beanName, mbd, bean);
+					return earlyBeanReference;
 				}
 			});
 		}
@@ -548,6 +556,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// Initialize the bean instance.
 		Object exposedObject = bean;
 		try {
+			// 依赖注入
 			populateBean(beanName, mbd, instanceWrapper);
 			if (exposedObject != null) {
 				// 初始化bean, 调用各种初始化方法：PostConstruct -> afterPropertiesSet -> customInitMethod

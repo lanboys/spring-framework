@@ -16,6 +16,12 @@
 
 package org.springframework.beans.factory.support;
 
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.BeanCurrentlyInCreationException;
+import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.FactoryBeanNotInitializedException;
+
 import java.security.AccessControlContext;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -23,12 +29,6 @@ import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanCreationException;
-import org.springframework.beans.factory.BeanCurrentlyInCreationException;
-import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 
 /**
  * Support base class for singleton registries which need to handle
@@ -43,6 +43,7 @@ import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanRegistry {
 
 	/** Cache of singleton objects created by FactoryBeans: FactoryBean name --> object */
+	// 缓存FactoryBean生成的单例bean, 原型模式下生成的不缓存
 	private final Map<String, Object> factoryBeanObjectCache = new ConcurrentHashMap<String, Object>(16);
 
 
@@ -96,11 +97,11 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	 * @see org.springframework.beans.factory.FactoryBean#getObject()
 	 */
 	protected Object getObjectFromFactoryBean(FactoryBean<?> factory, String beanName, boolean shouldPostProcess) {
-		if (factory.isSingleton() && containsSingleton(beanName)) {
+		if (factory.isSingleton() && containsSingleton(beanName)) {//containsSingleton 表示，需要提前将FactoryBean注册到singletonObjects
 			synchronized (getSingletonMutex()) {
 				Object object = this.factoryBeanObjectCache.get(beanName);
 				if (object == null) {
-					object = doGetObjectFromFactoryBean(factory, beanName);
+					object = doGetObjectFromFactoryBean(factory, beanName);// 生成bean
 					// Only post-process and store if not put there already during getObject() call above
 					// (e.g. because of circular reference processing triggered by custom getBean calls)
 					Object alreadyThere = this.factoryBeanObjectCache.get(beanName);
@@ -111,6 +112,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 						if (object != null && shouldPostProcess) {
 							if (isSingletonCurrentlyInCreation(beanName)) {
 								// Temporarily return non-post-processed object, not storing it yet..
+								// 暂时返回未经过后处理的对象，但还没有存储它
 								return object;
 							}
 							beforeSingletonCreation(beanName);
@@ -175,7 +177,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 				}
 			}
 			else {
-				object = factory.getObject();
+				object = factory.getObject();// 获取bean
 			}
 		}
 		catch (FactoryBeanNotInitializedException ex) {

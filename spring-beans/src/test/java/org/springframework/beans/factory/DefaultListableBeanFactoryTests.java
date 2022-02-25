@@ -16,28 +16,6 @@
 
 package org.springframework.beans.factory;
 
-import java.io.Closeable;
-import java.io.Serializable;
-import java.lang.reflect.Field;
-import java.net.MalformedURLException;
-import java.security.AccessControlContext;
-import java.security.AccessController;
-import java.security.Principal;
-import java.security.PrivilegedAction;
-import java.text.NumberFormat;
-import java.text.ParseException;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import javax.annotation.Priority;
-import javax.security.auth.Subject;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Ignore;
@@ -45,7 +23,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Matchers;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.NotWritablePropertyException;
@@ -96,9 +73,47 @@ import org.springframework.tests.sample.beans.factory.DummyFactory;
 import org.springframework.util.StopWatch;
 import org.springframework.util.StringValueResolver;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import java.io.Closeable;
+import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.net.MalformedURLException;
+import java.security.AccessControlContext;
+import java.security.AccessController;
+import java.security.Principal;
+import java.security.PrivilegedAction;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.Callable;
+
+import javax.annotation.Priority;
+import javax.security.auth.Subject;
+
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.BDDMockito.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.isNull;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.never;
+import static org.mockito.BDDMockito.verify;
+import static org.mockito.BDDMockito.when;
 
 /**
  * Tests properties population and autowire behavior.
@@ -1374,6 +1389,9 @@ public class DefaultListableBeanFactoryTests {
 		assertNull(bean.getSpouse());
 	}
 
+	/**
+	 *  禁止循环依赖
+	 */
 	@Test
 	public void testDependsOnCycle() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
