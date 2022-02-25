@@ -46,7 +46,7 @@ public class SimpleAliasRegistry implements AliasRegistry {
 		Assert.hasText(name, "'name' must not be empty");
 		Assert.hasText(alias, "'alias' must not be empty");
 		synchronized (this.aliasMap) {
-			if (alias.equals(name)) {
+			if (alias.equals(name)) {// 相等为什么要删除
 				this.aliasMap.remove(alias);
 			}
 			else {
@@ -194,7 +194,8 @@ public class SimpleAliasRegistry implements AliasRegistry {
 	}
 
 	/**
-	 * 确定原始名称，然后将别名解析为规范名称
+	 * 确定原始名称
+	 * 将别名解析为规范名称
 	 *
 	 * Determine the raw name, resolving aliases to canonical names.
 	 * @param name the user-specified name

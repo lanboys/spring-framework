@@ -18,13 +18,18 @@ package org.springframework.core;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Juergen Hoeller
  */
 public class SimpleAliasRegistryTests {
 
+	/**
+	 * 别名链测试
+	 */
 	@Test
 	public void testAliasChaining() {
 		SimpleAliasRegistry registry = new SimpleAliasRegistry();
@@ -45,6 +50,7 @@ public class SimpleAliasRegistryTests {
 		SimpleAliasRegistry registry = new SimpleAliasRegistry();
 		registry.registerAlias("name", "alias_a");
 		registry.registerAlias("name", "alias_b");
+		registry.registerAlias("alias_b", "alias_b");
 		assertTrue(registry.hasAlias("name", "alias_a"));
 		assertTrue(registry.hasAlias("name", "alias_b"));
 
@@ -60,4 +66,14 @@ public class SimpleAliasRegistryTests {
 		assertTrue(registry.hasAlias("real_name", "alias_c"));
 	}
 
+	@Test
+	public void testAliasEqualsName() {
+		SimpleAliasRegistry registry = new SimpleAliasRegistry();
+		registry.registerAlias("name", "alias_a");
+		registry.registerAlias("name", "alias_b");
+		// alias_b will remove 会被移除
+		registry.registerAlias("alias_b", "alias_b");
+		assertTrue(registry.hasAlias("name", "alias_a"));
+		assertFalse(registry.hasAlias("name", "alias_b"));
+	}
 }

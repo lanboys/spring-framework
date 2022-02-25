@@ -292,6 +292,8 @@ public @interface Bean {
 	 *    默认值，且bean是非DisposableBean子类，会自动判断是否需要销毁，bean有 'close' or 'shutdown'方法就会自动销毁
 	 *    非默认值，就不会自动销毁 'close' or 'shutdown'，而是调用配置的方法进行销毁
 	 *
+	 *    总结就是：啥都不干(不自定义销毁方法，不继承DisposableBean), 才会自动判断是否需要销毁
+	 *
 	 * 逻辑在 org.springframework.beans.factory.DisposableBean#inferDestroyMethodIfNecessary()
 	 *   org.springframework.beans.factory.DisposableBean#hasDestroyMethod()
 	 */

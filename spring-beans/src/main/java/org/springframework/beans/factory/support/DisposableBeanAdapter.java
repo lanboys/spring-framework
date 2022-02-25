@@ -210,6 +210,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 			}
 			return null;
 		}
+		// 自定义了销毁方法 也不会自动推断销毁方法
 		return (StringUtils.hasLength(destroyMethodName) ? destroyMethodName : null);
 	}
 
