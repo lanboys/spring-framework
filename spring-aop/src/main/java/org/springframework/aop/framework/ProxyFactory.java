@@ -93,7 +93,9 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	 * @return the proxy object
 	 */
 	public Object getProxy() {
-		return createAopProxy().getProxy();
+		AopProxy aopProxy = createAopProxy();
+		Object proxy = aopProxy.getProxy();
+		return proxy;
 	}
 
 	/**
@@ -106,7 +108,9 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	 * @return the proxy object
 	 */
 	public Object getProxy(ClassLoader classLoader) {
-		return createAopProxy().getProxy(classLoader);
+		AopProxy aopProxy = createAopProxy();
+		Object proxy = aopProxy.getProxy(classLoader);
+		return proxy;
 	}
 
 
@@ -122,7 +126,8 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T getProxy(Class<T> proxyInterface, Interceptor interceptor) {
-		return (T) new ProxyFactory(proxyInterface, interceptor).getProxy();
+		ProxyFactory proxyFactory = new ProxyFactory(proxyInterface, interceptor);
+		return (T) proxyFactory.getProxy();
 	}
 
 	/**
@@ -135,7 +140,8 @@ public class ProxyFactory extends ProxyCreatorSupport {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T getProxy(Class<T> proxyInterface, TargetSource targetSource) {
-		return (T) new ProxyFactory(proxyInterface, targetSource).getProxy();
+		ProxyFactory proxyFactory = new ProxyFactory(proxyInterface, targetSource);
+		return (T) proxyFactory.getProxy();
 	}
 
 	/**

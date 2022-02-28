@@ -330,7 +330,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					// It's a prototype -> create a new instance.
 					Object prototypeInstance = null;
 					try {
-						beforePrototypeCreation(beanName);
+						beforePrototypeCreation(beanName);// 保存正在创建的bean到ThreadLocal
 						prototypeInstance = createBean(beanName, mbd, args);
 					}
 					finally {

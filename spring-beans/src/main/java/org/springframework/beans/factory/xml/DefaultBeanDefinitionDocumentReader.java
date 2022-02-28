@@ -176,6 +176,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 			}
 		}
 		else {
+			// 解析自定义根标签
 			delegate.parseCustomElement(root);
 		}
 	}
