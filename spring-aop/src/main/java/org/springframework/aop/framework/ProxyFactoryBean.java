@@ -238,7 +238,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	 */
 	@Override
 	public Object getObject() throws BeansException {
-		// 初始化拦截链
+		// 初始化拦截链, 后面调用链(DefaultAdvisorChainFactory  config.getAdvisors())需要使用
 		initializeAdvisorChain();
 		if (isSingleton()) {
 			return getSingletonInstance();
@@ -317,6 +317,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 			}
 			// Initialize the shared singleton instance.
 			super.setFrozen(this.freezeProxy);
+			// 创建代理对象
 			this.singletonInstance = getProxy(createAopProxy());
 		}
 		return this.singletonInstance;

@@ -16,10 +16,10 @@
 
 package org.springframework.beans.factory.config;
 
-import java.beans.PropertyDescriptor;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
+
+import java.beans.PropertyDescriptor;
 
 /**
  * Subinterface of {@link BeanPostProcessor} that adds a before-instantiation callback,
@@ -42,6 +42,8 @@ import org.springframework.beans.PropertyValues;
  * @since 1.2
  * @see org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#setCustomTargetSourceCreators
  * @see org.springframework.aop.framework.autoproxy.target.LazyInitTargetSourceCreator
+ *
+ * 实例化前的处理器
  */
 public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 
@@ -63,6 +65,9 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	 * @param beanName the name of the bean
 	 * @return the bean object to expose instead of a default instance of the target bean,
 	 * or {@code null} to proceed with default instantiation
+	 *
+	 * 如果返回了对象，那么这个对象会替代目标对象，否则继续走实例化流程
+	 *
 	 * @throws org.springframework.beans.BeansException in case of errors
 	 * @see #postProcessAfterInstantiation
 	 * @see org.springframework.beans.factory.support.AbstractBeanDefinition#getBeanClass()

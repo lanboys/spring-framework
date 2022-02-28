@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <bean id="dog" class="org.springframework.aop.bing.Dog">
+        <property name="name" value="小黄"/>
+    </bean>
+
+    <bean id="txInterceptor" class="org.springframework.aop.bing.interceptor.TxInterceptor">
+    </bean>
+
+    <bean id="getAgeCounter" class="org.springframework.tests.aop.advice.CountingBeforeAdvice"/>
+
+    <!--<aop:aspectj-autoproxy proxy-target-class="true"/>-->
+
+    <aop:config>
+        <!-- 切点 -->
+        <aop:pointcut id="servicePointcut"
+                      expression="execution(* org.springframework.aop.bing.service.*.*(..))"/>
+
+        <!-- Advisor的另一种配置方式-->
+        <!--<aop:advisor advice-ref="getAgeCounter" pointcut-ref="servicePointcut"/>-->
+
+        <!-- 切面 -->
+        <aop:aspect ref="txInterceptor">
+            <!-- 通知 -->
+            <!-- 每一个 通知 都会解析生成一个 AspectJPointcutAdvisor 对象 -->
+            <!-- 之前 -->
+            <aop:before method="begin" pointcut-ref="servicePointcut"/>
+
+            <!-- 正常结束之后 -->
+            <aop:after-returning method="commit" pointcut-ref="servicePointcut"/>
+
+            <!-- 抛异常 -->
+            <!--<aop:after-throwing method="rollback" pointcut-ref="servicePointcut"-->
+            <!--                    throwing="throwable"/>-->
+
+            <!-- 相当于在finally里面 -->
+            <!--<aop:after method="finallyInvoke" pointcut-ref="servicePointcut"/>-->
+
+            <!-- 环绕通知  替代上面所有 -->
+            <!--<aop:around method="around" pointcut-ref="servicePointcut"/>-->
+        </aop:aspect>
+    </aop:config>
+
+</beans>

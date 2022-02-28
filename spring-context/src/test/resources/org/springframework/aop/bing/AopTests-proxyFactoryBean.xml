@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <bean id="targetDog" class="org.springframework.aop.bing.Dog">
+        <property name="name" value="小黄"/>
+    </bean>
+
+    <bean id="countInterceptor" class="org.springframework.aop.bing.interceptor.CountInterceptor"/>
+    <bean id="timeCountInterceptor"
+          class="org.springframework.aop.bing.interceptor.TimeCountInterceptor"/>
+
+    <bean id="dog" class="org.springframework.aop.framework.ProxyFactoryBean">
+        <property name="interfaces" value="org.springframework.aop.bing.service.DogService"/>
+        <property name="target" ref="targetDog"/>
+        <property name="interceptorNames" value="countInterceptor,timeCountInterceptor"/>
+        <!--<property name="proxyTargetClass" value="true"/>-->
+    </bean>
+
+</beans>

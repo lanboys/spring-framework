@@ -31,6 +31,8 @@ import org.aopalliance.aop.Advice;
  * implemented using interception.
  *
  * @author Rod Johnson
+ *
+ * 通知器，将 Advice 和 PointCut 结合起来
  */
 public interface Advisor {
 
@@ -42,6 +44,7 @@ public interface Advisor {
 	 * @see BeforeAdvice
 	 * @see ThrowsAdvice
 	 * @see AfterReturningAdvice
+	 * 通知，定义在链接点做什么
 	 */
 	Advice getAdvice();
 
