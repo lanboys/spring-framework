@@ -16,13 +16,8 @@
 
 package org.springframework.transaction.interceptor;
 
-import java.lang.reflect.Method;
-import java.util.Properties;
-import java.util.concurrent.ConcurrentMap;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
@@ -37,6 +32,10 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.StringUtils;
+
+import java.lang.reflect.Method;
+import java.util.Properties;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Base class for transactional aspects, such as the {@link TransactionInterceptor}
@@ -128,13 +127,13 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private String transactionManagerBeanName;
-
+	// 默认的事务管理器
 	private PlatformTransactionManager transactionManager;
 
 	private TransactionAttributeSource transactionAttributeSource;
 
 	private BeanFactory beanFactory;
-
+	// 事务管理器缓存，@Transactional 可以指定事务管理
 	private final ConcurrentMap<Object, PlatformTransactionManager> transactionManagerCache =
 			new ConcurrentReferenceHashMap<Object, PlatformTransactionManager>(4);
 
@@ -266,9 +265,11 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 */
 	protected Object invokeWithinTransaction(Method method, Class<?> targetClass, final InvocationCallback invocation)
 			throws Throwable {
-
 		// If the transaction attribute is null, the method is non-transactional.
-		final TransactionAttribute txAttr = getTransactionAttributeSource().getTransactionAttribute(method, targetClass);
+		// xml配置中 pointcut 和 attributes 的交集才会有事务，txAttr 为空则没有事务
+
+		//final TransactionAttribute txAttr = getTransactionAttributeSource().getTransactionAttribute(method, targetClass);
+		final TransactionAttribute txAttr = this.transactionAttributeSource.getTransactionAttribute(method, targetClass);
 		final PlatformTransactionManager tm = determineTransactionManager(txAttr);
 		final String joinpointIdentification = methodIdentification(method, targetClass, txAttr);
 
@@ -278,6 +279,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 
 			Object retVal;
 			try {
+				// 这是一个环绕通知
 				// This is an around advice: Invoke the next interceptor in the chain.
 				// This will normally result in a target object being invoked.
 				retVal = invocation.proceedWithInvocation();

@@ -562,23 +562,23 @@ project("spring-context") {
 //	}
 //}
 
-//project("spring-tx") {
-//	description = "Spring Transaction"
-//
-//	dependencies {
-//		compile(project(":spring-beans"))
-//		compile(project(":spring-core"))
-//		optional(project(":spring-aop"))
-//		optional(project(":spring-context"))  // for JCA, @EnableTransactionManagement
-//		optional("javax.transaction:javax.transaction-api:${jtaVersion}")
-//		optional("javax.resource:connector-api:1.5")
-//		optional("javax.ejb:ejb-api:${ejbVersion}")
-//		optional("com.ibm.websphere:uow:6.0.2.17")
-//		testCompile("org.aspectj:aspectjweaver:${aspectjVersion}")
-//		testCompile("org.eclipse.persistence:javax.persistence:2.0.0")
-//		testCompile("org.codehaus.groovy:groovy-all:${groovyVersion}")
-//	}
-//}
+project("spring-tx") {
+	description = "Spring Transaction"
+
+	dependencies {
+		compile(project(":spring-beans"))
+		compile(project(":spring-core"))
+		optional(project(":spring-aop"))
+		optional(project(":spring-context"))  // for JCA, @EnableTransactionManagement
+		optional("javax.transaction:javax.transaction-api:${jtaVersion}")
+		optional("javax.resource:connector-api:1.5")
+		optional("javax.ejb:ejb-api:${ejbVersion}")
+		optional("com.ibm.websphere:uow:6.0.2.17")
+		testCompile("org.aspectj:aspectjweaver:${aspectjVersion}")
+		testCompile("org.eclipse.persistence:javax.persistence:2.0.0")
+		testCompile("org.codehaus.groovy:groovy-all:${groovyVersion}")
+	}
+}
 
 //project("spring-jms") {
 //	description = "Spring JMS"
@@ -598,22 +598,22 @@ project("spring-context") {
 //	}
 //}
 
-//project("spring-jdbc") {
-//	description = "Spring JDBC"
-//
-//	dependencies {
-//		compile(project(":spring-beans"))
-//		compile(project(":spring-core"))
-//		compile(project(":spring-tx"))
-//		optional(project(":spring-context"))  // for JndiDataSourceLookup
-//		optional("javax.transaction:javax.transaction-api:${jtaVersion}")
-//		optional("com.mchange:c3p0:0.9.5.2")
-//		optional("org.hsqldb:hsqldb:${hsqldbVersion}")
-//		optional("com.h2database:h2:1.4.193")
-//		optional("org.apache.derby:derby:10.13.1.1")
-//		optional("org.apache.derby:derbyclient:10.13.1.1")
-//	}
-//}
+project("spring-jdbc") {
+	description = "Spring JDBC"
+
+	dependencies {
+		compile(project(":spring-beans"))
+		compile(project(":spring-core"))
+		compile(project(":spring-tx"))
+		optional(project(":spring-context"))  // for JndiDataSourceLookup
+		optional("javax.transaction:javax.transaction-api:${jtaVersion}")
+		optional("com.mchange:c3p0:0.9.5.2")
+		optional("org.hsqldb:hsqldb:${hsqldbVersion}")
+		optional("com.h2database:h2:1.4.193")
+		optional("org.apache.derby:derby:10.13.1.1")
+		optional("org.apache.derby:derbyclient:10.13.1.1")
+	}
+}
 
 //project("spring-context-support") {
 //	description = "Spring Context Support"

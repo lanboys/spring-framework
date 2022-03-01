@@ -11,8 +11,10 @@
 		<aop:advisor pointcut="execution(* *..ITestBean.*(..))" advice-ref="txAdvice"/>
 	</aop:config>
 
-	<tx:advice id="txAdvice">
+	<!-- 解析成 TransactionInterceptor 对象 -->
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
 		<tx:attributes>
+			<!-- 解析成 RuleBasedTransactionAttribute 对象 -->
 			<tx:method name="get*" read-only="true"/>
 			<tx:method name="set*"/>
 			<tx:method name="exceptional"/>
