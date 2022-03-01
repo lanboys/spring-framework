@@ -17,13 +17,16 @@
 			<!-- 解析成 RuleBasedTransactionAttribute 对象 -->
 			<tx:method name="get*" read-only="true"/>
 			<tx:method name="set*"/>
-			<tx:method name="exceptional"/>
+			<tx:method name="exceptional"
+					   rollback-for="org.springframework.transaction.TransactionException"
+					   no-rollback-for="java.lang.RuntimeException"/>
 		</tx:attributes>
 	</tx:advice>
 
 	<tx:advice id="txRollbackAdvice">
 		<tx:attributes>
-			<tx:method name="get*" rollback-for="java.lang.Exception"/>
+			<!-- 可以填写多个异常，用逗号隔开 -->
+			<tx:method name="get*" rollback-for="java.lang.RuntimeException, org.springframework.transaction.TransactionException"/>
 			<tx:method name="set*" no-rollback-for="java.lang.RuntimeException"/>
 		</tx:attributes>
 	</tx:advice>

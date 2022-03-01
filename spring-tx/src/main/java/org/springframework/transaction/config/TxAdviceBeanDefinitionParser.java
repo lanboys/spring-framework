@@ -148,6 +148,7 @@ class TxAdviceBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 	}
 
 	private void addRollbackRuleAttributesTo(List<RollbackRuleAttribute> rollbackRules, String rollbackForValue) {
+		// 可以填写多个异常，用逗号隔开
 		String[] exceptionTypeNames = StringUtils.commaDelimitedListToStringArray(rollbackForValue);
 		for (String typeName : exceptionTypeNames) {
 			rollbackRules.add(new RollbackRuleAttribute(StringUtils.trimWhitespace(typeName)));

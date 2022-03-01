@@ -287,6 +287,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			catch (Throwable ex) {
 				// target invocation exception
 				completeTransactionAfterThrowing(txInfo, ex);
+				// 处理完事务(提交或回滚)后仍然要把异常抛出去
 				throw ex;
 			}
 			finally {
@@ -539,6 +540,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			}
 			if (txInfo.transactionAttribute.rollbackOn(ex)) {
 				try {
+					// 回滚
 					txInfo.getTransactionManager().rollback(txInfo.getTransactionStatus());
 				}
 				catch (TransactionSystemException ex2) {
@@ -559,6 +561,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 				// We don't roll back on this exception.
 				// Will still roll back if TransactionStatus.isRollbackOnly() is true.
 				try {
+					// 继续提交
 					txInfo.getTransactionManager().commit(txInfo.getTransactionStatus());
 				}
 				catch (TransactionSystemException ex2) {

@@ -16,9 +16,9 @@
 
 package org.springframework.transaction.interceptor;
 
-import java.io.Serializable;
-
 import org.springframework.util.Assert;
+
+import java.io.Serializable;
 
 /**
  * Rule determining whether or not a given exception (and any subclasses)
@@ -117,7 +117,7 @@ public class RollbackRuleAttribute implements Serializable{
 		}
 		// If we've gone as far as we can go and haven't found it...
 		if (exceptionClass == Throwable.class) {
-			return -1;
+			return -1;// 找不到匹配的异常
 		}
 		return getDepth(exceptionClass.getSuperclass(), depth + 1);
 	}
