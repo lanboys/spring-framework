@@ -16,13 +16,9 @@
 
 package org.springframework.transaction.interceptor;
 
-import java.io.Serializable;
-import java.util.Properties;
-
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -32,8 +28,18 @@ import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.SerializationTestUtils;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
+import java.io.Serializable;
+import java.util.Properties;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.times;
+import static org.mockito.BDDMockito.verify;
 
 /**
  * Mock object based tests for TransactionInterceptor.
@@ -71,7 +77,7 @@ public class TransactionInterceptorTests extends AbstractTransactionAspectTests 
 		assertEquals(ptm, ti.getTransactionManager());
 		ti.setTransactionAttributeSource(tas);
 		assertEquals(tas, ti.getTransactionAttributeSource());
-
+		// 手动构建代理工厂
 		ProxyFactory pf = new ProxyFactory(target);
 		pf.addAdvice(0, ti);
 		return pf.getProxy();

@@ -26,6 +26,16 @@ import org.springframework.transaction.TransactionDefinition;
  * @author Colin Sampaleanu
  * @author Juergen Hoeller
  * @since 1.2
+ *
+ * https://mp.weixin.qq.com/s/6tRPXwXnWUW4mVfCdBlkog
+ * 传播性	描述
+ * REQUIRED	如果当前存在事务，则加入该事务；如果当前没有事务，则创建一个新的事务
+ * SUPPORTS	如果当前存在事务，则加入该事务；如果当前没有事务，则以非事务的方式继续运行
+ * MANDATORY	如果当前存在事务，则加入该事务；如果当前没有事务，则抛出异常
+ * REQUIRES_NEW	创建一个新的事务，如果当前存在事务，则把当前事务挂起
+ * NOT_SUPPORTED	以非事务方式运行，如果当前存在事务，则把当前事务挂起
+ * NEVER	以非事务方式运行，如果当前存在事务，则抛出异常
+ * NESTED	如果当前存在事务，则创建一个事务作为当前事务的嵌套事务来运行；如果当前没有事务，则该取值等价于 TransactionDefinition.PROPAGATION_REQUIRED
  */
 public enum Propagation {
 
@@ -33,6 +43,8 @@ public enum Propagation {
 	 * Support a current transaction, create a new one if none exists.
 	 * Analogous to EJB transaction attribute of the same name.
 	 * <p>This is the default setting of a transaction annotation.
+	 *
+	 * 如果当前存在事务，则加入该事务；如果当前没有事务，则创建一个新的事务
 	 */
 	REQUIRED(TransactionDefinition.PROPAGATION_REQUIRED),
 
@@ -46,12 +58,16 @@ public enum Propagation {
 	 * will be shared for the entire specified scope. Note that this depends on
 	 * the actual synchronization configuration of the transaction manager.
 	 * @see org.springframework.transaction.support.AbstractPlatformTransactionManager#setTransactionSynchronization
+	 *
+	 * 如果当前存在事务，则加入该事务；如果当前没有事务，则以非事务的方式继续运行
 	 */
 	SUPPORTS(TransactionDefinition.PROPAGATION_SUPPORTS),
 
 	/**
 	 * Support a current transaction, throw an exception if none exists.
 	 * Analogous to EJB transaction attribute of the same name.
+	 *
+	 * 如果当前存在事务，则加入该事务；如果当前没有事务，则抛出异常
 	 */
 	MANDATORY(TransactionDefinition.PROPAGATION_MANDATORY),
 
@@ -64,6 +80,8 @@ public enum Propagation {
 	 * which requires the {@code javax.transaction.TransactionManager} to be
 	 * made available to it (which is server-specific in standard Java EE).
 	 * @see org.springframework.transaction.jta.JtaTransactionManager#setTransactionManager
+	 *
+	 * 创建一个新的事务，如果当前存在事务，则把当前事务挂起
 	 */
 	REQUIRES_NEW(TransactionDefinition.PROPAGATION_REQUIRES_NEW),
 
@@ -76,12 +94,16 @@ public enum Propagation {
 	 * which requires the {@code javax.transaction.TransactionManager} to be
 	 * made available to it (which is server-specific in standard Java EE).
 	 * @see org.springframework.transaction.jta.JtaTransactionManager#setTransactionManager
+	 *
+	 * 以非事务方式运行，如果当前存在事务，则把当前事务挂起
 	 */
 	NOT_SUPPORTED(TransactionDefinition.PROPAGATION_NOT_SUPPORTED),
 
 	/**
 	 * Execute non-transactionally, throw an exception if a transaction exists.
 	 * Analogous to EJB transaction attribute of the same name.
+	 *
+	 * 以非事务方式运行，如果当前存在事务，则抛出异常
 	 */
 	NEVER(TransactionDefinition.PROPAGATION_NEVER),
 
@@ -93,6 +115,9 @@ public enum Propagation {
 	 * DataSourceTransactionManager. Some JTA providers might support nested
 	 * transactions as well.
 	 * @see org.springframework.jdbc.datasource.DataSourceTransactionManager
+	 *
+	 * 如果当前存在事务，则创建一个事务作为当前事务的嵌套事务来运行；如果当前没有事务，
+	 * 则该取值等价于 TransactionDefinition.PROPAGATION_REQUIRED
 	 */
 	NESTED(TransactionDefinition.PROPAGATION_NESTED);
 
