@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+
+    <!-- 这里测试不能用 SingleConnectionDataSource，事务挂起时，新事务获取的还是同一个连接 -->
+    <!-- <bean id="dataSource" class="org.springframework.jdbc.datasource.SingleConnectionDataSource"> -->
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="org.hsqldb.jdbcDriver"/>
+        <!-- hsqldb.tx=mvcc  更改锁设置 MVCC -->
+        <!-- hsqldb  http://www.hsqldb.org/doc/ -->
+        <!-- https://blog.csdn.net/isea533/article/details/94389224 -->
+        <property name="url" value="jdbc:hsqldb:mem:xdb;hsqldb.tx=mvcc"/>
+        <property name="username" value="sa"/>
+        <property name="password" value=""/>
+    </bean>
+
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <bean id="multiTxService" class="org.springframework.jdbc.tx.service.impl.MultiTxServiceImpl">
+        <property name="jdbcTemplate" ref="jdbcTemplate"/>
+        <property name="singleTxService" ref="singleTxService"/>
+    </bean>
+
+    <bean id="singleTxService" class="org.springframework.jdbc.tx.service.impl.SingleTxServiceImpl">
+        <property name="jdbcTemplate" ref="jdbcTemplate"/>
+    </bean>
+
+    <!--  配置事务 -->
+    <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <tx:advice id="txAdvice" transaction-manager="txManager">
+        <tx:attributes>
+            <!--    REQUIRED	    如果当前存在事务，则加入该事务；如果当前没有事务，则创建一个新的事务-->
+            <!--    SUPPORTS	    如果当前存在事务，则加入该事务；如果当前没有事务，则以非事务的方式继续运行-->
+            <!--    MANDATORY	    如果当前存在事务，则加入该事务；如果当前没有事务，则抛出异常-->
+            <!--    REQUIRES_NEW	创建一个新的事务，如果当前存在事务，则把当前事务挂起-->
+            <!--    NOT_SUPPORTED	以非事务方式运行，如果当前存在事务，则把当前事务挂起-->
+            <!--    NEVER	        以非事务方式运行，如果当前存在事务，则抛出异常-->
+            <!--    NESTED	        如果当前存在事务，则创建一个事务作为当前事务的嵌套事务来运行；如果当前没有事务，-->
+            <!--                    则该取值等价于 TransactionDefinition.PROPAGATION_REQUIRED-->
+            <tx:method name="required" propagation="REQUIRED"/>
+            <tx:method name="supports" propagation="SUPPORTS"/>
+            <tx:method name="mandatory" propagation="MANDATORY"/>
+            <tx:method name="requiresNew" propagation="REQUIRES_NEW"/>
+            <tx:method name="notSupported" propagation="NOT_SUPPORTED"/>
+            <tx:method name="never" propagation="NEVER"/>
+            <tx:method name="nested" propagation="NESTED"/>
+
+            <tx:method name="multi*" propagation="REQUIRED"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <aop:config>
+        <aop:pointcut id="pc1"
+                      expression="execution(* org.springframework.jdbc.tx.service.*Service.*(..))"/>
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="pc1"/>
+    </aop:config>
+</beans>

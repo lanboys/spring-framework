@@ -464,6 +464,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		TransactionStatus status = null;
 		if (txAttr != null) {
 			if (tm != null) {
+				// 创建事务
 				status = tm.getTransaction(txAttr);
 			}
 			else {
@@ -538,6 +539,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 				logger.trace("Completing transaction for [" + txInfo.getJoinpointIdentification() +
 						"] after exception: " + ex);
 			}
+			// 检查 rollback-for 配置
 			if (txInfo.transactionAttribute.rollbackOn(ex)) {
 				try {
 					// 回滚

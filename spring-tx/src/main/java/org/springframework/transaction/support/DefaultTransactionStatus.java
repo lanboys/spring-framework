@@ -49,9 +49,9 @@ import org.springframework.transaction.SavepointManager;
 public class DefaultTransactionStatus extends AbstractTransactionStatus {
 
 	private final Object transaction;
-
+	// 是否为新事务
 	private final boolean newTransaction;
-
+	// 如果已为此事务打开了一个新的事务同步，则 true
 	private final boolean newSynchronization;
 
 	private final boolean readOnly;
@@ -109,8 +109,10 @@ public class DefaultTransactionStatus extends AbstractTransactionStatus {
 	}
 
 	/**
-	 * Return if a new transaction synchronization has been opened
+	 * Return true if a new transaction synchronization has been opened
 	 * for this transaction.
+	 *
+	 * 如果已为此事务打开了一个新的事务同步，则返回true
 	 */
 	public boolean isNewSynchronization() {
 		return this.newSynchronization;

@@ -28,6 +28,7 @@ public class JdbcNamespaceHandler extends NamespaceHandlerSupport {
 
 	@Override
 	public void init() {
+		// 注册自定义标签解析器
 		registerBeanDefinitionParser("embedded-database", new EmbeddedDatabaseBeanDefinitionParser());
 		registerBeanDefinitionParser("initialize-database", new InitializeDatabaseBeanDefinitionParser());
 	}
