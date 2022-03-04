@@ -74,6 +74,7 @@ abstract class AbstractNameValueExpression<T> implements NameValueExpression<T> 
 		else {
 			isMatch = matchName(request);
 		}
+		// 前面加了 ! 结果取反
 		return (this.isNegated ? !isMatch : isMatch);
 	}
 

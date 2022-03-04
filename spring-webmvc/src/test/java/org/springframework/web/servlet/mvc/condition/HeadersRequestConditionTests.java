@@ -16,147 +16,168 @@
 
 package org.springframework.web.servlet.mvc.condition;
 
-import java.util.Collection;
-
 import org.junit.Test;
-
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.servlet.mvc.condition.HeadersRequestCondition.HeaderExpression;
 
-import static org.junit.Assert.*;
+import java.util.Collection;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Arjen Poutsma
  */
 public class HeadersRequestConditionTests {
 
-	@Test
-	public void headerEquals() {
-		assertEquals(new HeadersRequestCondition("foo"), new HeadersRequestCondition("foo"));
-		assertEquals(new HeadersRequestCondition("foo"), new HeadersRequestCondition("FOO"));
-		assertFalse(new HeadersRequestCondition("foo").equals(new HeadersRequestCondition("bar")));
-		assertEquals(new HeadersRequestCondition("foo=bar"), new HeadersRequestCondition("foo=bar"));
-		assertEquals(new HeadersRequestCondition("foo=bar"), new HeadersRequestCondition("FOO=bar"));
-	}
+  @Test
+  public void headerEquals() {
+    assertEquals(new HeadersRequestCondition("foo"), new HeadersRequestCondition("foo"));
+    assertEquals(new HeadersRequestCondition("foo"), new HeadersRequestCondition("FOO"));
+    assertNotEquals(new HeadersRequestCondition("foo"), new HeadersRequestCondition("bar"));
+    assertEquals(new HeadersRequestCondition("foo=bar"), new HeadersRequestCondition("foo=bar"));
+    assertEquals(new HeadersRequestCondition("foo=bar"), new HeadersRequestCondition("FOO=bar"));
+  }
 
-	@Test
-	public void headerPresent() {
-		HeadersRequestCondition condition = new HeadersRequestCondition("accept");
+  @Test
+  public void headerPresent() {
+    // 没有等号 = ，只匹配请求头是否存在，存在就匹配成功
+    HeadersRequestCondition condition = new HeadersRequestCondition("foo");
 
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.addHeader("Accept", "");
+    MockHttpServletRequest request = new MockHttpServletRequest();
+    request.addHeader("foo", "bar");
 
-		assertNotNull(condition.getMatchingCondition(request));
-	}
+    // 要求存在请求头 foo, 所以匹配成功
+    assertNotNull(condition.getMatchingCondition(request));
+  }
 
-	@Test
-	public void headerPresentNoMatch() {
-		HeadersRequestCondition condition = new HeadersRequestCondition("foo");
+  @Test
+  public void headerNotPresent() {
+    HeadersRequestCondition condition = new HeadersRequestCondition("!foo");
 
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.addHeader("bar", "");
+    MockHttpServletRequest request = new MockHttpServletRequest();
+    request.addHeader("foo", "bar");
 
-		assertNull(condition.getMatchingCondition(request));
-	}
+    // 要求没有请求头 foo, 所以匹配失败
+    assertNull(condition.getMatchingCondition(request));
+  }
 
-	@Test
-	public void headerNotPresent() {
-		HeadersRequestCondition condition = new HeadersRequestCondition("!accept");
+  @Test
+  public void headerValueMatch() {
+    HeadersRequestCondition condition = new HeadersRequestCondition("foo=bar");
 
-		MockHttpServletRequest request = new MockHttpServletRequest();
+    MockHttpServletRequest request = new MockHttpServletRequest();
+    request.addHeader("foo", "bar");
 
-		assertNotNull(condition.getMatchingCondition(request));
-	}
+    // 要求请求头 key value 都匹配上，所以这里匹配成功
+    assertNotNull(condition.getMatchingCondition(request));
+  }
 
-	@Test
-	public void headerValueMatch() {
-		HeadersRequestCondition condition = new HeadersRequestCondition("foo=bar");
+  @Test
+  public void headerValueMatchButNot() {
+    HeadersRequestCondition condition = new HeadersRequestCondition("foo=bar");
 
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.addHeader("foo", "bar");
+    MockHttpServletRequest request = new MockHttpServletRequest();
+    request.addHeader("foo", "bazz");
 
-		assertNotNull(condition.getMatchingCondition(request));
-	}
+    // 要求请求头 key value 都匹配上，所以这里匹配失败
+    assertNull(condition.getMatchingCondition(request));
+  }
 
-	@Test
-	public void headerValueNoMatch() {
-		HeadersRequestCondition condition = new HeadersRequestCondition("foo=bar");
+  @Test
+  public void headerValueMatchButNotPresent() {
+    HeadersRequestCondition condition = new HeadersRequestCondition("foo=bar");
 
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.addHeader("foo", "bazz");
+    MockHttpServletRequest request = new MockHttpServletRequest();
+    // 不存在，则值相当于 null
+    //request.addHeader("foo", null);
 
-		assertNull(condition.getMatchingCondition(request));
-	}
+    // 要求请求头 key value 都匹配上，所以这里匹配失败
+    assertNull(condition.getMatchingCondition(request));
+  }
 
-	@Test
-	public void headerCaseSensitiveValueMatch() {
-		HeadersRequestCondition condition = new HeadersRequestCondition("foo=Bar");
+  @Test
+  public void headerValueMatchNegated() {
+    HeadersRequestCondition condition = new HeadersRequestCondition("foo!=bar");
+    MockHttpServletRequest request = new MockHttpServletRequest();
+    request.addHeader("foo", "baz");
 
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.addHeader("foo", "bar");
+    // 要求值不一样，匹配成功
+    assertNotNull(condition.getMatchingCondition(request));
+  }
 
-		assertNull(condition.getMatchingCondition(request));
-	}
+  @Test
+  public void headerValueMatchNegatedButMatch() {
+    HeadersRequestCondition condition = new HeadersRequestCondition("foo!=bar");
+    MockHttpServletRequest request = new MockHttpServletRequest();
+    request.addHeader("foo", "bar");
 
-	@Test
-	public void headerValueMatchNegated() {
-		HeadersRequestCondition condition = new HeadersRequestCondition("foo!=bar");
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.addHeader("foo", "baz");
+    // 要求值不一样，匹配成功
+    assertNull(condition.getMatchingCondition(request));
+  }
 
-		assertNotNull(condition.getMatchingCondition(request));
-	}
+  @Test
+  public void headerValueMatchNegatedButNoPresent() {
+    HeadersRequestCondition condition = new HeadersRequestCondition("foo!=bar");
+    MockHttpServletRequest request = new MockHttpServletRequest();
+    // 不存在，则值相当于 null
+    //request.addHeader("foo", null);
 
-	@Test
-	public void headerValueNoMatchNegated() {
-		HeadersRequestCondition condition = new HeadersRequestCondition("foo!=bar");
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.addHeader("foo", "bar");
+    // 要求值不一样，匹配成功
+    assertNotNull(condition.getMatchingCondition(request));
+  }
 
-		assertNull(condition.getMatchingCondition(request));
-	}
+  @Test
+  public void headerCaseSensitiveValueMatch() {
+    HeadersRequestCondition condition = new HeadersRequestCondition("foo=Bar");
 
-	@Test
-	public void compareTo() {
-		MockHttpServletRequest request = new MockHttpServletRequest();
+    MockHttpServletRequest request = new MockHttpServletRequest();
+    request.addHeader("foo", "bar");
 
-		HeadersRequestCondition condition1 = new HeadersRequestCondition("foo", "bar", "baz");
-		HeadersRequestCondition condition2 = new HeadersRequestCondition("foo", "bar");
+    // 要求大小写一致，这里匹配失败
+    assertNull(condition.getMatchingCondition(request));
+  }
 
-		int result = condition1.compareTo(condition2, request);
-		assertTrue("Invalid comparison result: " + result, result < 0);
+  @Test
+  public void compareTo() {
+    MockHttpServletRequest request = new MockHttpServletRequest();
 
-		result = condition2.compareTo(condition1, request);
-		assertTrue("Invalid comparison result: " + result, result > 0);
-	}
+    HeadersRequestCondition condition1 = new HeadersRequestCondition("foo", "bar", "baz");
+    HeadersRequestCondition condition2 = new HeadersRequestCondition("foo", "bar");
 
+    int result = condition1.compareTo(condition2, request);
+    assertTrue("Invalid comparison result: " + result, result < 0);
 
-	@Test
-	public void combine() {
-		HeadersRequestCondition condition1 = new HeadersRequestCondition("foo=bar");
-		HeadersRequestCondition condition2 = new HeadersRequestCondition("foo=baz");
+    result = condition2.compareTo(condition1, request);
+    assertTrue("Invalid comparison result: " + result, result > 0);
+  }
 
-		HeadersRequestCondition result = condition1.combine(condition2);
-		Collection<HeaderExpression> conditions = result.getContent();
-		assertEquals(2, conditions.size());
-	}
+  @Test
+  public void combine() {
+    HeadersRequestCondition condition1 = new HeadersRequestCondition("foo=bar");
+    HeadersRequestCondition condition2 = new HeadersRequestCondition("foo=baz");
 
-	@Test
-	public void getMatchingCondition() {
-		MockHttpServletRequest request = new MockHttpServletRequest();
-		request.addHeader("foo", "bar");
+    HeadersRequestCondition result = condition1.combine(condition2);
+    Collection<HeaderExpression> conditions = result.getContent();
+    assertEquals(2, conditions.size());
+  }
 
-		HeadersRequestCondition condition = new HeadersRequestCondition("foo");
+  @Test
+  public void getMatchingCondition() {
+    MockHttpServletRequest request = new MockHttpServletRequest();
+    request.addHeader("foo", "bar");
 
-		HeadersRequestCondition result = condition.getMatchingCondition(request);
-		assertEquals(condition, result);
+    HeadersRequestCondition condition = new HeadersRequestCondition("foo");
 
-		condition = new HeadersRequestCondition("bar");
+    HeadersRequestCondition result = condition.getMatchingCondition(request);
+    assertEquals(condition, result);
 
-		result = condition.getMatchingCondition(request);
-		assertNull(result);
-	}
+    condition = new HeadersRequestCondition("bar");
 
-
-
+    result = condition.getMatchingCondition(request);
+    assertNull(result);
+  }
 }

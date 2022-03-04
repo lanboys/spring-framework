@@ -54,6 +54,8 @@ public interface RequestCondition<T> {
 	 * be matched to a pre-flight request it should return an instance with
 	 * empty content thus not causing a failure to match.
 	 * @return a condition instance in case of a match or {@code null} otherwise.
+	 *
+	 * 匹配成功，返回自己，否则返回null
 	 */
 	T getMatchingCondition(HttpServletRequest request);
 

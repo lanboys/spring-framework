@@ -16,9 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method;
 
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.http.HttpMethod;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
@@ -34,6 +31,10 @@ import org.springframework.web.servlet.mvc.condition.RequestConditionHolder;
 import org.springframework.web.servlet.mvc.condition.RequestMethodsRequestCondition;
 import org.springframework.web.util.UrlPathHelper;
 
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * A {@link RequestCondition} that consists of the following other conditions:
  * <ol>
@@ -45,6 +46,8 @@ import org.springframework.web.util.UrlPathHelper;
  * <li>{@link ProducesRequestCondition}
  * <li>{@code RequestCondition} (optional, custom request condition)
  * </ol>
+ *
+ * Controller中带注解 @RequestMapping 方法的请求条件的容器
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
@@ -207,26 +210,30 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	 */
 	@Override
 	public RequestMappingInfo getMatchingCondition(HttpServletRequest request) {
+		// 返回匹配的请求方法条件
 		RequestMethodsRequestCondition methods = this.methodsCondition.getMatchingCondition(request);
+		// 如果参数条件匹配，返回条件自己
 		ParamsRequestCondition params = this.paramsCondition.getMatchingCondition(request);
+		// 如果请求头条件匹配，返回条件自己
 		HeadersRequestCondition headers = this.headersCondition.getMatchingCondition(request);
 		ConsumesRequestCondition consumes = this.consumesCondition.getMatchingCondition(request);
 		ProducesRequestCondition produces = this.producesCondition.getMatchingCondition(request);
 
+		// 需要全部匹配上 &&
 		if (methods == null || params == null || headers == null || consumes == null || produces == null) {
 			return null;
 		}
-
+		// 正则比较复杂耗时 放后面再匹配
 		PatternsRequestCondition patterns = this.patternsCondition.getMatchingCondition(request);
 		if (patterns == null) {
 			return null;
 		}
-
+		// 自定义的条件 也需要匹配上
 		RequestConditionHolder custom = this.customConditionHolder.getMatchingCondition(request);
 		if (custom == null) {
 			return null;
 		}
-
+		// 返回匹配得上的条件
 		return new RequestMappingInfo(this.name, patterns,
 				methods, params, headers, consumes, produces, custom.getCondition());
 	}

@@ -16,15 +16,16 @@
 
 package org.springframework.web.servlet.mvc.condition;
 
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.cors.CorsUtils;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.util.ObjectUtils;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.cors.CorsUtils;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * A logical conjunction (' && ') request condition that matches a request against
@@ -67,6 +68,7 @@ public final class HeadersRequestCondition extends AbstractRequestCondition<Head
 		if (headers != null) {
 			for (String header : headers) {
 				HeaderExpression expr = new HeaderExpression(header);
+				// 跳过这两个请求头
 				if ("Accept".equalsIgnoreCase(expr.name) || "Content-Type".equalsIgnoreCase(expr.name)) {
 					continue;
 				}
@@ -114,10 +116,12 @@ public final class HeadersRequestCondition extends AbstractRequestCondition<Head
 			return PRE_FLIGHT_MATCH;
 		}
 		for (HeaderExpression expression : expressions) {
+			// 需要全部匹配上 &&
 			if (!expression.match(request)) {
 				return null;
 			}
 		}
+		// expressions 为空，也认为匹配上了
 		return this;
 	}
 

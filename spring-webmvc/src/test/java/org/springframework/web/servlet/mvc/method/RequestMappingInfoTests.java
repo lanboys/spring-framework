@@ -16,16 +16,16 @@
 
 package org.springframework.web.servlet.mvc.method;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-
 import org.junit.Test;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.bind.annotation.RequestMethod;
+
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
@@ -48,7 +48,7 @@ public class RequestMappingInfoTests {
 
 	@Test
 	public void createEmpty() {
-		RequestMappingInfo info = paths().build();
+		RequestMappingInfo info = RequestMappingInfo.paths().build();
 
 		assertEquals(0, info.getPatternsCondition().getPatterns().size());
 		assertEquals(0, info.getMethodsCondition().getMethods().size());

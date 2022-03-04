@@ -16,12 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Set;
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.stereotype.Controller;
@@ -41,6 +35,13 @@ import org.springframework.web.servlet.mvc.condition.CompositeRequestCondition;
 import org.springframework.web.servlet.mvc.condition.RequestCondition;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMapping;
+
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Creates {@link RequestMappingInfo} instances from type and method-level
@@ -185,11 +186,12 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 */
 	@Override
 	protected RequestMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
+		// 创建 RequestMappingInfo
 		RequestMappingInfo info = createRequestMappingInfo(method);
 		if (info != null) {
 			RequestMappingInfo typeInfo = createRequestMappingInfo(handlerType);
 			if (typeInfo != null) {
-				info = typeInfo.combine(info);
+				info = typeInfo.combine(info);// 类上有注解的话，条件需要合并
 			}
 		}
 		return info;
@@ -203,8 +205,10 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * @see #getCustomMethodCondition(Method)
 	 */
 	private RequestMappingInfo createRequestMappingInfo(AnnotatedElement element) {
+		// 创建 RequestMappingInfo
 		RequestMapping requestMapping = AnnotatedElementUtils.findMergedAnnotation(element, RequestMapping.class);
-		RequestCondition<?> condition = (element instanceof Class ?
+		// 自定义条件
+		RequestCondition<?> condition = (element instanceof Class ? // RequestMapping 可以在类上或者方法上
 				getCustomTypeCondition((Class<?>) element) : getCustomMethodCondition((Method) element));
 		return (requestMapping != null ? createRequestMappingInfo(requestMapping, condition) : null);
 	}
@@ -247,7 +251,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 */
 	protected RequestMappingInfo createRequestMappingInfo(
 			RequestMapping requestMapping, RequestCondition<?> customCondition) {
-
+		// 从注解上获取值 创建 RequestMappingInfo
 		return RequestMappingInfo
 				.paths(resolveEmbeddedValuesInPatterns(requestMapping.path()))
 				.methods(requestMapping.method())

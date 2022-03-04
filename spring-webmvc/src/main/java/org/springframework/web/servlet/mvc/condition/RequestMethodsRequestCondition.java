@@ -16,19 +16,20 @@
 
 package org.springframework.web.servlet.mvc.condition;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.cors.CorsUtils;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+
 import javax.servlet.DispatcherType;
 import javax.servlet.http.HttpServletRequest;
-
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.cors.CorsUtils;
 
 /**
  * A logical disjunction (' || ') request condition that matches a request
@@ -142,6 +143,7 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 					return new RequestMethodsRequestCondition(method);
 				}
 			}
+			// 特殊情况 如果没匹配上，HEAD 请求可以匹配 GET 条件
 			if (httpMethod == HttpMethod.HEAD && getMethods().contains(RequestMethod.GET)) {
 				return GET_CONDITION;
 			}
