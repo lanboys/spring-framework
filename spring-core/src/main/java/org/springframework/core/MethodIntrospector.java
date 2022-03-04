@@ -16,6 +16,9 @@
 
 package org.springframework.core;
 
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
@@ -23,9 +26,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils;
 
 /**
  * Defines the algorithm for searching for metadata-associated methods exhaustively
@@ -64,7 +64,7 @@ public abstract class MethodIntrospector {
 
 		for (Class<?> currentHandlerType : handlerTypes) {
 			final Class<?> targetClass = (specificHandlerType != null ? specificHandlerType : currentHandlerType);
-
+			// 遍历所有方法
 			ReflectionUtils.doWithMethods(currentHandlerType, new ReflectionUtils.MethodCallback() {
 				@Override
 				public void doWith(Method method) {
@@ -150,6 +150,9 @@ public abstract class MethodIntrospector {
 
 		/**
 		 * Perform a lookup on the given method and return associated metadata, if any.
+		 *
+		 * 对给定的方法执行查找，如果有，则返回相关的元数据。
+		 *
 		 * @param method the method to inspect
 		 * @return non-null metadata to be associated with a method if there is a match,
 		 * or {@code null} for no match

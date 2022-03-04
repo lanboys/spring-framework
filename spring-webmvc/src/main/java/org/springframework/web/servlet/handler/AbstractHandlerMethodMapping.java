@@ -16,21 +16,6 @@
 
 package org.springframework.web.servlet.handler;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.InitializingBean;
@@ -43,6 +28,22 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerMapping;
+
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Abstract base class for {@link HandlerMapping} implementations that define
@@ -88,7 +89,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	private boolean detectHandlerMethodsInAncestorContexts = false;
 
 	private HandlerMethodMappingNamingStrategy<T> namingStrategy;
-
+	// 映射关系注册中心
 	private final MappingRegistry mappingRegistry = new MappingRegistry();
 
 
@@ -338,17 +339,21 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 */
 	protected HandlerMethod lookupHandlerMethod(String lookupPath, HttpServletRequest request) throws Exception {
 		List<Match> matches = new ArrayList<Match>();
+		//用url快速查找，同一个url，存在多个RequestMappingInfo，但不是所有都匹配
 		List<T> directPathMatches = this.mappingRegistry.getMappingsByUrl(lookupPath);
 		if (directPathMatches != null) {
+			// 根据 RequestMappingInfo 继续匹配合适的
 			addMatchingMappings(directPathMatches, matches, request);
 		}
 		if (matches.isEmpty()) {
 			// No choice but to go through all mappings...
+			// 执行到这里说明 request 没有url, 无法用url快速查找匹配, 将全局查找
 			addMatchingMappings(this.mappingRegistry.getMappings().keySet(), matches, request);
 		}
 
 		if (!matches.isEmpty()) {
 			Comparator<Match> comparator = new MatchComparator(getMappingComparator(request));
+			// 排序，最匹配的放第一
 			Collections.sort(matches, comparator);
 			if (logger.isTraceEnabled()) {
 				logger.trace("Found " + matches.size() + " matching mapping(s) for [" +
@@ -359,6 +364,14 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 				if (CorsUtils.isPreFlightRequest(request)) {
 					return PREFLIGHT_AMBIGUOUS_MATCH;
 				}
+				//  @RequestMapping(value = "/foo", method = RequestMethod.GET, params="p1")
+				//  @RequestMapping(value = "/foo", method = RequestMethod.GET, params="p2")
+
+				//  MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
+				//  request.addParameter("p1","");
+				//  request.addParameter("p2","");
+
+				// 上面这种情况就会出现，第一第二 匹配度一致的情况
 				Match secondBestMatch = matches.get(1);
 				if (comparator.compare(bestMatch, secondBestMatch) == 0) {
 					Method m1 = bestMatch.handlerMethod.getMethod();
@@ -372,6 +385,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			return bestMatch.handlerMethod;
 		}
 		else {
+			// 处理不匹配的情况
 			return handleNoMatch(this.mappingRegistry.getMappings().keySet(), lookupPath, request);
 		}
 	}
@@ -476,9 +490,10 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	class MappingRegistry {
 
 		private final Map<T, MappingRegistration<T>> registry = new HashMap<T, MappingRegistration<T>>();
-
+		// RequestMappingInfoHandlerMapping类中：          RequestMappingInfo --->  handlerMethod
+		// 或者测试类中的 MyHandlerMethodMapping 是属于：   String             --->  handlerMethod
 		private final Map<T, HandlerMethod> mappingLookup = new LinkedHashMap<T, HandlerMethod>();
-
+		// 同一个url, 存在多个RequestMappingInfo
 		private final MultiValueMap<String, T> urlLookup = new LinkedMultiValueMap<String, T>();
 
 		private final Map<String, List<HandlerMethod>> nameLookup =
@@ -538,13 +553,16 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			this.readWriteLock.writeLock().lock();
 			try {
 				HandlerMethod handlerMethod = createHandlerMethod(handler, method);
+				// 检查 RequestMappingInfo 是否唯一
 				assertUniqueMethodMapping(handlerMethod, mapping);
 
 				if (logger.isInfoEnabled()) {
 					logger.info("Mapped \"" + mapping + "\" onto " + handlerMethod);
 				}
+				// RequestMappingInfo - handlerMethod
 				this.mappingLookup.put(mapping, handlerMethod);
 
+				// urlLookup 只保存非正则url, 方便快速查找，类似于索引
 				List<String> directUrls = getDirectUrls(mapping);
 				for (String url : directUrls) {
 					this.urlLookup.add(url, mapping);
@@ -570,6 +588,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 		private void assertUniqueMethodMapping(HandlerMethod newHandlerMethod, T mapping) {
 			HandlerMethod handlerMethod = this.mappingLookup.get(mapping);
+			// RequestMappingInfo 一样，方法却不一样，表明存在相同的 RequestMappingInfo
 			if (handlerMethod != null && !handlerMethod.equals(newHandlerMethod)) {
 				throw new IllegalStateException(
 						"Ambiguous mapping. Cannot map '" +	newHandlerMethod.getBean() + "' method \n" +
@@ -582,6 +601,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			List<String> urls = new ArrayList<String>(1);
 			for (String path : getMappingPathPatterns(mapping)) {
 				if (!getPathMatcher().isPattern(path)) {
+					// 非正则 才会添加进去
 					urls.add(path);
 				}
 			}

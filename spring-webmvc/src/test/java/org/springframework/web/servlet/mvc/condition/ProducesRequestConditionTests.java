@@ -16,15 +16,18 @@
 
 package org.springframework.web.servlet.mvc.condition;
 
-import java.util.Collection;
-import java.util.Collections;
-
 import org.junit.Test;
-
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.servlet.mvc.condition.ProducesRequestCondition.ProduceMediaTypeExpression;
 
-import static org.junit.Assert.*;
+import java.util.Collection;
+import java.util.Collections;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link ProducesRequestCondition}.
@@ -36,6 +39,7 @@ public class ProducesRequestConditionTests {
 
 	@Test
 	public void match() {
+		// 表明自己生产什么类型的数据，如果客户端接受的数据类型不包含，则不匹配
 		ProducesRequestCondition condition = new ProducesRequestCondition("text/plain");
 
 		MockHttpServletRequest request = new MockHttpServletRequest();

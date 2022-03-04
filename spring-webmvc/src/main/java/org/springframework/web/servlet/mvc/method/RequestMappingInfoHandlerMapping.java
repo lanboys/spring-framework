@@ -16,18 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.InvalidMediaTypeException;
@@ -45,6 +33,19 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.AbstractHandlerMethodMapping;
 import org.springframework.web.servlet.mvc.condition.NameValueExpression;
 import org.springframework.web.util.WebUtils;
+
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Abstract base class for classes for which {@link RequestMappingInfo} defines
@@ -127,6 +128,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 			decodedUriVariables = Collections.emptyMap();
 		}
 		else {
+			// 解析 url 上的变量
 			bestPattern = patterns.iterator().next();
 			uriVariables = getPathMatcher().extractUriTemplateVariables(bestPattern, lookupPath);
 			decodedUriVariables = getUrlPathHelper().decodePathVariables(request, uriVariables);
@@ -242,6 +244,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 
 		public PartialMatchHelper(Set<RequestMappingInfo> infos, HttpServletRequest request) {
 			for (RequestMappingInfo info : infos) {
+				// 找匹配的
 				if (info.getPatternsCondition().getMatchingCondition(request) != null) {
 					this.partialMatches.add(new PartialMatch(info, request));
 				}

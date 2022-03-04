@@ -16,12 +16,8 @@
 
 package org.springframework.web.method;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.GenericTypeResolver;
@@ -32,6 +28,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.ResponseStatus;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 
 /**
  * Encapsulates information about a handler method consisting of a
@@ -49,6 +48,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 3.1
+ *
+ * Controller - Controller的方法
+ * 处理器 -方法 类
  */
 public class HandlerMethod {
 

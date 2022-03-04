@@ -16,19 +16,8 @@
 
 package org.springframework.web.servlet.handler;
 
-import static org.junit.Assert.*;
-
-import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
-
-import javax.servlet.http.HttpServletRequest;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.stereotype.Controller;
@@ -40,6 +29,18 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.util.UrlPathHelper;
+
+import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 
 /**
@@ -71,6 +72,7 @@ public class HandlerMethodMappingTests {
 
 	@Test(expected = IllegalStateException.class)
 	public void registerDuplicates() {
+		this.mapping.registerMapping("foo", this.handler, this.method1);
 		this.mapping.registerMapping("foo", this.handler, this.method1);
 		this.mapping.registerMapping("foo", this.handler, this.method2);
 	}
@@ -263,6 +265,7 @@ public class HandlerMethodMappingTests {
 
 		@Override
 		protected String getMappingForMethod(Method method, Class<?> handlerType) {
+			// url 直接对应方法名称
 			String methodName = method.getName();
 			return methodName.startsWith("handler") ? methodName : null;
 		}

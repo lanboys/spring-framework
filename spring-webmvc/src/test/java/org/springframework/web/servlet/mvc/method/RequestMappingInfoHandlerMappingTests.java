@@ -16,18 +16,8 @@
 
 package org.springframework.web.servlet.mvc.method;
 
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import javax.servlet.http.HttpServletRequest;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -59,8 +49,25 @@ import org.springframework.web.servlet.mvc.condition.ProducesRequestCondition;
 import org.springframework.web.servlet.mvc.condition.RequestMethodsRequestCondition;
 import org.springframework.web.util.UrlPathHelper;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Test fixture with {@link RequestMappingInfoHandlerMapping}.
@@ -91,6 +98,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		this.emptyMethod = new HandlerMethod(testController, "empty");
 
 		this.handlerMapping = new TestRequestMappingInfoHandlerMapping();
+		//Controller 是 handler
 		this.handlerMapping.registerHandler(testController);
 		this.handlerMapping.setRemoveSemicolonContent(false);
 	}
@@ -107,6 +115,7 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	@Test
 	public void getHandlerDirectMatch() throws Exception {
+		// 测试 AbstractHandlerMethodMapping.lookupHandlerMethod 通过url直接快速查找
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
 		HandlerMethod handlerMethod = getHandler(request);
 
@@ -115,6 +124,7 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	@Test
 	public void getHandlerGlobMatch() throws Exception {
+		// 测试 AbstractHandlerMethodMapping.lookupHandlerMethod 通过 全局进行 查找
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/bar");
 		HandlerMethod handlerMethod = getHandler(request);
 		assertEquals(this.barMethod.getMethod(), handlerMethod.getMethod());
@@ -122,6 +132,7 @@ public class RequestMappingInfoHandlerMappingTests {
 
 	@Test
 	public void getHandlerEmptyPathMatch() throws Exception {
+		//  "" 和 "/" 效果是一致的
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "");
 		HandlerMethod handlerMethod = getHandler(request);
 
@@ -140,6 +151,16 @@ public class RequestMappingInfoHandlerMappingTests {
 		HandlerMethod handlerMethod = getHandler(request);
 
 		assertEquals(this.fooParamMethod.getMethod(), handlerMethod.getMethod());
+
+		// 存在匹配度一致的方法
+		// Ambiguous handler methods mapped for HTTP path 'http://localhost/foo'
+		try {
+			request.addParameter("p1", "");
+			getHandler(request);
+			fail("IllegalStateException expected");
+		} catch (IllegalStateException ex) {
+			assertTrue(ex.getMessage().startsWith("Ambiguous handler methods mapped for HTTP path 'http://localhost/foo'"));
+		}
 	}
 
 	@Test
@@ -443,6 +464,10 @@ public class RequestMappingInfoHandlerMappingTests {
 
 		@RequestMapping(value = "/foo", method = RequestMethod.GET, params="p")
 		public void fooParam() {
+		}
+
+		@RequestMapping(value = "/foo", method = RequestMethod.GET, params = "p1")
+		public void fooParam1() {
 		}
 
 		@RequestMapping(value = "/ba*", method = { RequestMethod.GET, RequestMethod.HEAD })
