@@ -571,6 +571,14 @@ public class DispatcherServlet extends FrameworkServlet {
 	private void initHandlerMappings(ApplicationContext context) {
 		this.handlerMappings = null;
 
+		// 检测所有 handlerMapping 比如：
+		// RequestMappingHandlerMapping   ---->   使用注解@RequestMapping
+		// BeanNameUrlHandlerMapping      ---->   自动检测容器中beanName以 "/" 开头的bean
+		// SimpleUrlHandlerMapping        ---->   作用是？？
+
+		// RequestMappingHandlerMapping   AnnotationDrivenBeanDefinitionParser.parse() xml添加标签 annotation-driven 后注册的
+		// BeanNameUrlHandlerMapping      MvcNamespaceUtils.registerBeanNameUrlHandlerMapping() 默认注册的，多个地方都调用了
+		// SimpleUrlHandlerMapping        DefaultServletHandlerBeanDefinitionParser.parse() xml添加标签 default-servlet-handler 后注册的
 		if (this.detectAllHandlerMappings) {
 			// Find all HandlerMappings in the ApplicationContext, including ancestor contexts.
 			// 找到所有 HandlerMappings 包含 parent BeanFactory
@@ -579,6 +587,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			if (!matchingBeans.isEmpty()) {
 				this.handlerMappings = new ArrayList<HandlerMapping>(matchingBeans.values());
 				// We keep HandlerMappings in sorted order.
+				// 排序
 				AnnotationAwareOrderComparator.sort(this.handlerMappings);
 			}
 		}

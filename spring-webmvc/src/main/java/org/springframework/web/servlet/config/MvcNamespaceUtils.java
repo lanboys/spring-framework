@@ -16,9 +16,6 @@
 
 package org.springframework.web.servlet.config;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
@@ -32,6 +29,9 @@ import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
 import org.springframework.web.util.UrlPathHelper;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Convenience methods for use in MVC namespace BeanDefinitionParsers.
@@ -129,6 +129,7 @@ public abstract class MvcNamespaceUtils {
 			mappingDef.getPropertyValues().add("order", 2);	// consistent with WebMvcConfigurationSupport
 			RuntimeBeanReference corsRef = MvcNamespaceUtils.registerCorsConfigurations(null, context, source);
 			mappingDef.getPropertyValues().add("corsConfigurations", corsRef);
+			// 注册 org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping
 			context.getRegistry().registerBeanDefinition(BEAN_NAME_URL_HANDLER_MAPPING_BEAN_NAME, mappingDef);
 			context.registerComponent(new BeanComponentDefinition(mappingDef, BEAN_NAME_URL_HANDLER_MAPPING_BEAN_NAME));
 		}

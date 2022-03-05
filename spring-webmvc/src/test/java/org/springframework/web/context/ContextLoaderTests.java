@@ -16,14 +16,7 @@
 
 package org.springframework.web.context;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-
 import org.junit.Test;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
@@ -45,8 +38,23 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.SimpleWebApplicationContext;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Tests for {@link ContextLoader} and {@link ContextLoaderListener}.
@@ -260,11 +268,13 @@ public class ContextLoaderTests {
 
 	@Test
 	public void testContextLoaderWithCustomContext() throws Exception {
+		// 自定义 spring 容器上下文
 		MockServletContext sc = new MockServletContext("");
 		sc.addInitParameter(ContextLoader.CONTEXT_CLASS_PARAM,
 				"org.springframework.web.servlet.SimpleWebApplicationContext");
 		ServletContextListener listener = new ContextLoaderListener();
 		ServletContextEvent event = new ServletContextEvent(sc);
+		// 模拟 tomcat 在初始化 ServletContext 的时候回调监听器
 		listener.contextInitialized(event);
 		WebApplicationContext wc = (WebApplicationContext) sc.getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
 		assertTrue("Correct WebApplicationContext exposed in ServletContext", wc instanceof SimpleWebApplicationContext);
@@ -272,6 +282,7 @@ public class ContextLoaderTests {
 
 	@Test
 	public void testContextLoaderWithInvalidLocation() throws Exception {
+		// 设置 spring 容器的配置文件路径, wex.xml 中对应的标签 <context-param>
 		MockServletContext sc = new MockServletContext("");
 		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM, "/WEB-INF/myContext.xml");
 		ServletContextListener listener = new ContextLoaderListener();
@@ -342,6 +353,17 @@ public class ContextLoaderTests {
 		servlet.init(new MockServletConfig(new MockServletContext(""), "test"));
 		assertTrue(servlet.getWebApplicationContext().containsBean("kerry"));
 		assertTrue(servlet.getWebApplicationContext().containsBean("kerryX"));
+	}
+
+	@Test
+	public void testFrameworkServletWithServletConfig() throws Exception {
+		MockServletConfig servletConfig = new MockServletConfig(new MockServletContext(""), "dispatcher");
+		servletConfig.addInitParameter("contextClass", "org.springframework.web.context.support.XmlWebApplicationContext");
+		servletConfig.addInitParameter("contextConfigLocation", "/org/springframework/web/context/WEB-INF/testNamespace.xml "
+				+ "/org/springframework/web/context/WEB-INF/context-addition.xml");
+
+		DispatcherServlet servlet = new DispatcherServlet();
+		servlet.init(servletConfig);
 	}
 
 	@Test

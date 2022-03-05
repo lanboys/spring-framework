@@ -16,18 +16,18 @@
 
 package org.springframework.web.context;
 
-import java.util.EventListener;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletException;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
-import static org.junit.Assert.*;
+import java.util.EventListener;
+
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletException;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test case for {@link AbstractContextLoaderInitializer}.
@@ -53,10 +53,12 @@ public class ContextLoaderInitializerTests {
 
 	@Test
 	public void register() throws ServletException {
+		// 模拟 tomcat 容器调用，我们就在这期间给ServletContext注册ContextLoaderListener
 		initializer.onStartup(servletContext);
 
 		assertTrue(eventListener instanceof ContextLoaderListener);
 		ContextLoaderListener cll = (ContextLoaderListener) eventListener;
+		// 模拟 tomcat 容器调用
 		cll.contextInitialized(new ServletContextEvent(servletContext));
 
 		WebApplicationContext applicationContext = WebApplicationContextUtils

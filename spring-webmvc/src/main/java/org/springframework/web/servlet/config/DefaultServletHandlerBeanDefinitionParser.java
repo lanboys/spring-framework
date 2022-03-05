@@ -16,10 +16,6 @@
 
 package org.springframework.web.servlet.config;
 
-import java.util.Map;
-
-import org.w3c.dom.Element;
-
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.support.ManagedMap;
@@ -30,6 +26,9 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
 import org.springframework.web.servlet.resource.DefaultServletHttpRequestHandler;
+import org.w3c.dom.Element;
+
+import java.util.Map;
 
 /**
  * {@link BeanDefinitionParser} that parses a {@code default-servlet-handler} element to
@@ -55,11 +54,12 @@ class DefaultServletHandlerBeanDefinitionParser implements BeanDefinitionParser 
 			defaultServletHandlerDef.getPropertyValues().add("defaultServletName", defaultServletName);
 		}
 		String defaultServletHandlerName = parserContext.getReaderContext().generateBeanName(defaultServletHandlerDef);
+		// 注册 DefaultServletHttpRequestHandler
 		parserContext.getRegistry().registerBeanDefinition(defaultServletHandlerName, defaultServletHandlerDef);
 		parserContext.registerComponent(new BeanComponentDefinition(defaultServletHandlerDef, defaultServletHandlerName));
 
 		Map<String, String> urlMap = new ManagedMap<String, String>();
-		urlMap.put("/**", defaultServletHandlerName);
+		urlMap.put("/**", defaultServletHandlerName);// 匹配所有的资源?
 
 		RootBeanDefinition handlerMappingDef = new RootBeanDefinition(SimpleUrlHandlerMapping.class);
 		handlerMappingDef.setSource(source);
@@ -67,10 +67,12 @@ class DefaultServletHandlerBeanDefinitionParser implements BeanDefinitionParser 
 		handlerMappingDef.getPropertyValues().add("urlMap", urlMap);
 
 		String handlerMappingBeanName = parserContext.getReaderContext().generateBeanName(handlerMappingDef);
+		// 注册 org.springframework.web.servlet.handler.SimpleUrlHandlerMapping#0
 		parserContext.getRegistry().registerBeanDefinition(handlerMappingBeanName, handlerMappingDef);
 		parserContext.registerComponent(new BeanComponentDefinition(handlerMappingDef, handlerMappingBeanName));
 
 		// Ensure BeanNameUrlHandlerMapping (SPR-8289) and default HandlerAdapters are not "turned off"
+		// 里面注册了 org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping
 		MvcNamespaceUtils.registerDefaultComponents(parserContext, source);
 
 		return null;

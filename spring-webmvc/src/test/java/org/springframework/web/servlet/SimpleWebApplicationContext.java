@@ -16,12 +16,6 @@
 
 package org.springframework.web.servlet;
 
-import java.io.IOException;
-import java.util.Locale;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.context.support.StaticMessageSource;
@@ -39,6 +33,13 @@ import org.springframework.web.servlet.theme.AbstractThemeResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.XmlViewResolver;
 
+import java.io.IOException;
+import java.util.Locale;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * @author Juergen Hoeller
  * @since 21.05.2003
@@ -47,6 +48,7 @@ public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 
 	@Override
 	public void refresh() throws BeansException {
+		// beanName以"/" 开头, 会被检测为 handler
 		registerSingleton("/locale.do", LocaleChecker.class);
 
 		addMessage("test", Locale.ENGLISH, "test message");
@@ -55,7 +57,7 @@ public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 		addMessage("testArgsFormat", Locale.ENGLISH, "test {0} message {1,number,#.##} X");
 
 		registerSingleton(UiApplicationContextUtils.THEME_SOURCE_BEAN_NAME, DummyThemeSource.class);
-
+		// 注册 handlerMapping
 		registerSingleton("handlerMapping", BeanNameUrlHandlerMapping.class);
 		registerSingleton("viewResolver", InternalResourceViewResolver.class);
 

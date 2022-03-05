@@ -16,17 +16,18 @@
 
 package org.springframework.web;
 
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+
 import java.lang.reflect.Modifier;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.Set;
+
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.HandlesTypes;
-
-import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 
 /**
  * Servlet 3.0 {@link ServletContainerInitializer} designed to support code-based
@@ -135,6 +136,14 @@ public class SpringServletContainerInitializer implements ServletContainerInitia
 	 * @param servletContext the servlet context to be initialized
 	 * @see WebApplicationInitializer#onStartup(ServletContext)
 	 * @see AnnotationAwareOrderComparator
+	 *
+	 * ServletContainerInitializer接口是为了提供一个机会给应用程序通过代码的形式注册 servlet / filter / listener
+	 * 而不是一定要在 web.xml 中注册
+	 *
+	 * 这里暂且猜测 一个 web.xml 对应一个 ServletContext，一个 tomcat 对应多个 web.xml，也就是多个 ServletContext
+	 *
+	 * 注解 @HandlesTypes value里面的类的所有子类的class都会传到 onStartup 方法的 webAppInitializerClasses 中
+	 *      这是由 tomcat 容器内部处理的
 	 */
 	@Override
 	public void onStartup(Set<Class<?>> webAppInitializerClasses, ServletContext servletContext)

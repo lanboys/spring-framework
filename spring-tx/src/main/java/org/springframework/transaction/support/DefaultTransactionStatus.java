@@ -153,9 +153,12 @@ public class DefaultTransactionStatus extends AbstractTransactionStatus {
 	 * <p>Will return {@code true} if the global transaction itself has been marked
 	 * rollback-only by the transaction coordinator, for example in case of a timeout.
 	 * @see SmartTransactionObject#isRollbackOnly()
+	 *
+	 * 就是连接上是否标记 RollbackOnly
 	 */
 	@Override
 	public boolean isGlobalRollbackOnly() {
+		// 通常都是SmartTransactionObject的子类
 		return ((this.transaction instanceof SmartTransactionObject) &&
 				((SmartTransactionObject) this.transaction).isRollbackOnly());
 	}
