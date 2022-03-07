@@ -16,18 +16,19 @@
 
 package org.springframework.web.context.request;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
 import org.springframework.util.Assert;
 import org.springframework.util.NumberUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.WebUtils;
+
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 /**
  * Servlet-based implementation of the {@link RequestAttributes} interface.
@@ -132,6 +133,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 
 	@Override
 	public Object getAttribute(String name, int scope) {
+		// 请求作用域
 		if (scope == SCOPE_REQUEST) {
 			if (!isRequestActive()) {
 				throw new IllegalStateException(
@@ -140,6 +142,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 			return this.request.getAttribute(name);
 		}
 		else {
+			// session 作用域
 			HttpSession session = getSession(false);
 			if (session != null) {
 				try {
@@ -159,6 +162,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 
 	@Override
 	public void setAttribute(String name, Object value, int scope) {
+		// 请求作用域对象放请求属性里面
 		if (scope == SCOPE_REQUEST) {
 			if (!isRequestActive()) {
 				throw new IllegalStateException(
@@ -167,6 +171,7 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 			this.request.setAttribute(name, value);
 		}
 		else {
+			// session作用域对象放session属性里面
 			HttpSession session = getSession(true);
 			this.sessionAttributesToUpdate.remove(name);
 			session.setAttribute(name, value);
