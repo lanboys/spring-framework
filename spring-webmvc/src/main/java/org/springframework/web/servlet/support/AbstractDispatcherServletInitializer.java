@@ -95,7 +95,7 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 		// 替代了web.xml
 		FrameworkServlet dispatcherServlet = createDispatcherServlet(servletAppContext);
 		dispatcherServlet.setContextInitializers(getServletApplicationContextInitializers());
-
+		// 手动注册servlet
 		ServletRegistration.Dynamic registration = servletContext.addServlet(servletName, dispatcherServlet);
 		Assert.notNull(registration,
 				"Failed to register servlet with name '" + servletName + "'." +

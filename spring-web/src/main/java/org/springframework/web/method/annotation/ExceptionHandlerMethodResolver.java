@@ -16,6 +16,13 @@
 
 package org.springframework.web.method.annotation;
 
+import org.springframework.core.ExceptionDepthComparator;
+import org.springframework.core.MethodIntrospector;
+import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils.MethodFilter;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,13 +30,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.springframework.core.ExceptionDepthComparator;
-import org.springframework.core.MethodIntrospector;
-import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils.MethodFilter;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 
 /**
  * Discovers {@linkplain ExceptionHandler @ExceptionHandler} methods in a given class,
@@ -68,10 +68,18 @@ public class ExceptionHandlerMethodResolver {
 	/**
 	 * A constructor that finds {@link ExceptionHandler} methods in the given type.
 	 * @param handlerType the type to introspect
+	 *
+	 *    handlerType 包括：
+	 *         1. 抛异常的处理器方法 HandlerMethod 所在的类，比如Controller类，它里面的 @ExceptionHandler
+	 *                     方法就是异常处理方法，只负责当前Controller的异常处理
+	 *         2. 有 @ControllerAdviceBean 注解的类，一个 ControllerAdviceBean 对应一个 ExceptionHandlerMethodResolver
+	 *
+	 *    优先级： 1 > 2
 	 */
 	public ExceptionHandlerMethodResolver(Class<?> handlerType) {
 		for (Method method : MethodIntrospector.selectMethods(handlerType, EXCEPTION_HANDLER_METHODS)) {
 			for (Class<? extends Throwable> exceptionType : detectExceptionMappings(method)) {
+				// 建立异常 ---> 处理方法 映射关系
 				addExceptionMapping(exceptionType, method);
 			}
 		}
@@ -85,9 +93,11 @@ public class ExceptionHandlerMethodResolver {
 	@SuppressWarnings("unchecked")
 	private List<Class<? extends Throwable>> detectExceptionMappings(Method method) {
 		List<Class<? extends Throwable>> result = new ArrayList<Class<? extends Throwable>>();
+		// 从注解上获取能处理的异常
 		detectAnnotationExceptionMappings(method, result);
 		if (result.isEmpty()) {
 			for (Class<?> paramType : method.getParameterTypes()) {
+				// 从参数上获取能处理的异常
 				if (Throwable.class.isAssignableFrom(paramType)) {
 					result.add((Class<? extends Throwable>) paramType);
 				}

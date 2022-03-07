@@ -57,7 +57,7 @@ public class HandlerMethod {
 	/** Logger that is available to subclasses */
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final Object bean;
+	private final Object bean;// 就是 Controller 对象
 
 	private final BeanFactory beanFactory;
 

@@ -16,16 +16,17 @@
 
 package org.springframework.web.servlet.view;
 
+import org.springframework.web.context.support.WebApplicationObjectSupport;
+import org.springframework.web.servlet.View;
+import org.springframework.web.servlet.ViewResolver;
+
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.web.context.support.WebApplicationObjectSupport;
-import org.springframework.web.servlet.View;
-import org.springframework.web.servlet.ViewResolver;
 
 /**
  * Convenient base class for {@link org.springframework.web.servlet.ViewResolver}
@@ -143,6 +144,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	@Override
 	public View resolveViewName(String viewName, Locale locale) throws Exception {
 		if (!isCache()) {
+			// 不缓存视图
 			return createView(viewName, locale);
 		}
 		else {

@@ -16,11 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.core.Conventions;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -41,6 +36,12 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
+
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Resolves method arguments annotated with {@code @RequestBody} and handles return
@@ -105,11 +106,13 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
+		// 是否有 @RequestBody 注解
 		return parameter.hasParameterAnnotation(RequestBody.class);
 	}
 
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
+		// 是否有 @ResponseBody 注解
 		return (AnnotatedElementUtils.hasAnnotation(returnType.getContainingClass(), ResponseBody.class) ||
 				returnType.hasMethodAnnotation(ResponseBody.class));
 	}
@@ -149,6 +152,7 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 
 		Object arg = readWithMessageConverters(inputMessage, parameter, paramType);
 		if (arg == null) {
+			// 是否必填
 			if (checkRequired(parameter)) {
 				throw new HttpMessageNotReadableException("Required request body is missing: " +
 						parameter.getMethod().toGenericString());
@@ -166,11 +170,13 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest)
 			throws IOException, HttpMediaTypeNotAcceptableException, HttpMessageNotWritableException {
 
+		// 标记请求已被处理
 		mavContainer.setRequestHandled(true);
 		ServletServerHttpRequest inputMessage = createInputMessage(webRequest);
 		ServletServerHttpResponse outputMessage = createOutputMessage(webRequest);
 
 		// Try even with null return value. ResponseBodyAdvice could get involved.
+		// 处理返回值
 		writeWithMessageConverters(returnValue, returnType, inputMessage, outputMessage);
 	}
 

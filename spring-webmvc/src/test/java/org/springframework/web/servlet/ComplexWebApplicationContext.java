@@ -129,6 +129,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		pvs.add("basename", "org.springframework.web.servlet.complexviews");
 		registerSingleton("viewResolver", ResourceBundleViewResolver.class, pvs);
 
+		// InternalResourceViewResolver 不配置 viewNames ，表示所有 viewName 都可以处理
 		pvs = new MutablePropertyValues();
 		pvs.add("suffix", ".jsp");
 		registerSingleton("viewResolver2", InternalResourceViewResolver.class, pvs);
@@ -528,6 +529,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		@Override
 		public void onApplicationEvent(ApplicationEvent event) {
 			if (event instanceof RequestHandledEvent) {
+				// 统计请求数量
 				this.counter++;
 			}
 		}

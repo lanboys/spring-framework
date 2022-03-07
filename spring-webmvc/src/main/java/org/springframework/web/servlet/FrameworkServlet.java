@@ -672,6 +672,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 		postProcessWebApplicationContext(wac);
 		applyInitializers(wac);
+		// 刷新容器，刷新完成后回调到 ContextRefreshListener，开始做各种初始化操作，如 initHandlerMappings、initHandlerAdapters
 		wac.refresh();
 	}
 
@@ -972,6 +973,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
 		asyncManager.registerCallableInterceptor(FrameworkServlet.class.getName(), new RequestBindingInterceptor());
 
+		// RequestContextHolder 绑定到线程
 		initContextHolders(request, localeContext, requestAttributes);
 
 		try {
@@ -991,6 +993,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		}
 
 		finally {
+			// 释放绑定到线程的资源
 			resetContextHolders(request, previousLocaleContext, previousAttributes);
 			if (requestAttributes != null) {
 				requestAttributes.requestCompleted();
@@ -1009,7 +1012,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 					}
 				}
 			}
-			// 发布请求处理事件
+			// 请求结束后，发布请求处理事件
 			publishRequestHandledEvent(request, response, startTime, failureCause);
 		}
 	}
@@ -1073,7 +1076,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 	private void publishRequestHandledEvent(
 			HttpServletRequest request, HttpServletResponse response, long startTime, Throwable failureCause) {
-		// 发布事件开关
+		// 发布请求事件开关
 		if (this.publishEvents) {
 			// Whether or not we succeeded, publish an event.
 			long processingTime = System.currentTimeMillis() - startTime;

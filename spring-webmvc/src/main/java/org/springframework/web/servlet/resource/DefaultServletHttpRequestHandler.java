@@ -16,16 +16,17 @@
 
 package org.springframework.web.servlet.resource;
 
+import org.springframework.util.StringUtils;
+import org.springframework.web.HttpRequestHandler;
+import org.springframework.web.context.ServletContextAware;
+
 import java.io.IOException;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.util.StringUtils;
-import org.springframework.web.HttpRequestHandler;
-import org.springframework.web.context.ServletContextAware;
 
 /**
  * An {@link HttpRequestHandler} for serving static files using the Servlet container's "default" Servlet.
@@ -119,6 +120,9 @@ public class DefaultServletHttpRequestHandler implements HttpRequestHandler, Ser
 			throw new IllegalStateException("A RequestDispatcher could not be located for the default servlet '" +
 					this.defaultServletName + "'");
 		}
+		// http://c.biancheng.net/view/4013.html
+		// 因为 DispatcherServlet 拦截了所有请求，所有静态资源也被拦截，在经过其他HandlerMapping的过滤后，
+		// 会来到这里，通过 请求转发的方式 转回 tomcat
 		rd.forward(request, response);
 	}
 

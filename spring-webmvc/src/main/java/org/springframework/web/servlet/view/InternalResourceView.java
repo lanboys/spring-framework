@@ -16,14 +16,15 @@
 
 package org.springframework.web.servlet.view;
 
+import org.springframework.util.StringUtils;
+import org.springframework.web.util.WebUtils;
+
 import java.util.Map;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.springframework.util.StringUtils;
-import org.springframework.web.util.WebUtils;
 
 /**
  * Wrapper for a JSP or other resource within the same web application.
@@ -165,6 +166,7 @@ public class InternalResourceView extends AbstractUrlBasedView {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Forwarding to resource [" + getUrl() + "] in InternalResourceView '" + getBeanName() + "'");
 			}
+			// 请求转发 将请求转发到一个新的 Servlet，如处理 jsp 的 Servlet
 			rd.forward(request, response);
 		}
 	}

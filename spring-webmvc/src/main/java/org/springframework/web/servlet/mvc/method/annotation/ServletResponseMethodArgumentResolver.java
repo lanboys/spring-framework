@@ -16,17 +16,18 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import java.io.OutputStream;
-import java.io.Writer;
-import java.lang.reflect.Method;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
+
+import java.io.OutputStream;
+import java.io.Writer;
+import java.lang.reflect.Method;
+
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Resolves response-related method argument values of types:
@@ -60,6 +61,7 @@ public class ServletResponseMethodArgumentResolver implements HandlerMethodArgum
 	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 
+		// 接口方法中的 HttpServletResponse 参数就是这里解析的
 		if (mavContainer != null) {
 			mavContainer.setRequestHandled(true);
 		}

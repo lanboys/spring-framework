@@ -16,13 +16,7 @@
 
 package org.springframework.web.servlet.handler;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-
 import org.junit.Test;
-
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,6 +32,12 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -61,6 +61,7 @@ public class HandlerMappingIntrospectorTests {
 		cxt.refresh();
 
 		List<?> expected = Arrays.asList(cxt.getBean("hmA"), cxt.getBean("hmB"), cxt.getBean("hmC"));
+		// 检测所有 handlerMapping
 		List<HandlerMapping> actual = getIntrospector(cxt).getHandlerMappings();
 
 		assertEquals(expected, actual);
@@ -87,7 +88,7 @@ public class HandlerMappingIntrospectorTests {
 	public void defaultHandlerMappings() throws Exception {
 		StaticWebApplicationContext cxt = new StaticWebApplicationContext();
 		cxt.refresh();
-
+		// 获取默认的 handlerMapping
 		List<HandlerMapping> actual = getIntrospector(cxt).getHandlerMappings();
 		assertEquals(2, actual.size());
 		assertEquals(BeanNameUrlHandlerMapping.class, actual.get(0).getClass());
