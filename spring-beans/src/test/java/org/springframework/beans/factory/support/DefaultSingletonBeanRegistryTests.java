@@ -157,7 +157,7 @@ public class DefaultSingletonBeanRegistryTests {
 
     @Override
     public void destroy() throws Exception {
-      System.out.println(name + "was destroyed");
+      System.out.println(name + " was destroyed");
     }
   }
 }
