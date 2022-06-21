@@ -52,6 +52,8 @@ public interface BeanPostProcessor {
 	 * if {@code null}, no subsequent BeanPostProcessors will be invoked
 	 * @throws org.springframework.beans.BeansException in case of errors
 	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet
+	 *
+	 * 对象创建后，初始化前执行
 	 */
 	Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException;
 
@@ -74,6 +76,8 @@ public interface BeanPostProcessor {
 	 * @throws org.springframework.beans.BeansException in case of errors
 	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet
 	 * @see org.springframework.beans.factory.FactoryBean
+	 *
+	 *  对象创建后，初始化后执行
 	 */
 	Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException;
 

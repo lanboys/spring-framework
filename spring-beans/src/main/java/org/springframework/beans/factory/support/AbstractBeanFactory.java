@@ -239,6 +239,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		final String beanName = transformedBeanName(name);
 		Object bean;
 
+		// 查看模拟测试 DefaultSingletonBeanRegistry2Tests
+
 		// Eagerly check singleton cache for manually registered singletons.
 		// 查找顺序 ：singletonObjects  -->  earlySingletonObjects  -->  singletonFactories
 		Object sharedInstance = getSingleton(beanName);
@@ -287,11 +289,12 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 				// Guarantee initialization of beans that the current bean depends on.
 				// https://www.cnblogs.com/idea-persistence/p/11261098.html
-				// 只有在 配置了 depend-on 标签的时候，才会解析，有值
 				// depends-on适用于表面上看起来两个bean之间没有使用属性之类的强连接的bean，但是两个bean又确实存在前后依赖关系的情况，
 				// 使用了depends-on的时候，依赖他人的bean是先于被依赖bean销毁的。 一般不会这么使用。
 				// 也就是这样配置的情况，才会抛出 BeanCreationException 异常
+
 				String[] dependsOn = mbd.getDependsOn();
+				// 只有在 配置了 depend-on 标签的时候，才会有值
 				if (dependsOn != null) {
 					for (String dep : dependsOn) {
 						// 检查一下 自己依赖的对象，是否也依赖自己
@@ -319,7 +322,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 						@Override
 						public Object getObject() throws BeansException {
 							try {
-								// bean 此时已经注入好参数
+								// bean 此时已经注入好参数  createBean 实现在 AbstractAutowireCapableBeanFactory 类中 486 行
 								Object bean = createBean(beanName, mbd, args);
 								return bean;
 							}

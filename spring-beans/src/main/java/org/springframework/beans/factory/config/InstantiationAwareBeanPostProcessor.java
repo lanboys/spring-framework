@@ -72,6 +72,8 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	 * @see #postProcessAfterInstantiation
 	 * @see org.springframework.beans.factory.support.AbstractBeanDefinition#getBeanClass()
 	 * @see org.springframework.beans.factory.support.AbstractBeanDefinition#getFactoryMethodName()
+	 *
+	 * 实例化前执行
 	 */
 	Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException;
 
@@ -88,6 +90,8 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
 	 * instances being invoked on this bean instance.
 	 * @throws org.springframework.beans.BeansException in case of errors
 	 * @see #postProcessBeforeInstantiation
+	 *
+	 * 实例化后执行
 	 */
 	boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException;
 

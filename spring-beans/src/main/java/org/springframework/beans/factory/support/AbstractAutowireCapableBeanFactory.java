@@ -536,6 +536,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		// Eagerly cache singletons to be able to resolve circular references
 		// even when triggered by lifecycle interfaces like BeanFactoryAware.
+		// 单例 、允许循环依赖、正在创建的单例   才可以提前暴露
 		boolean earlySingletonExposure = (mbd.isSingleton() && this.allowCircularReferences &&
 				isSingletonCurrentlyInCreation(beanName));
 		if (earlySingletonExposure) {
@@ -551,6 +552,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				@Override
 				public Object getObject() throws BeansException {
 					// 这里的bean其实在前面已经创建好了
+					// 注意这里不是直接返回已经创建好的原始的 Bean ，如果创建的 Bean是有代理的，那么注入的就应该是代理 Bean，而不是原始的 Bean
 					Object earlyBeanReference = getEarlyBeanReference(beanName, mbd, bean);
 					return earlyBeanReference;
 				}
@@ -558,12 +560,15 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		// Initialize the bean instance.
-		Object exposedObject = bean;
+		Object exposedObject = bean; // bean： 原始的 bean
 		try {
 			// 依赖注入
 			populateBean(beanName, mbd, instanceWrapper);
 			if (exposedObject != null) {
 				// 初始化bean, 调用各种初始化方法：PostConstruct -> afterPropertiesSet -> customInitMethod
+
+				// 如果存在 aop 代理，并且有循环依赖，那么 bean == exposedObject 可能会相等，因为循环依赖已经提前生成代理了
+				// 主要是因为 exposedObject 如果提前代理过，就会跳过 Spring AOP 代理，所以 exposedObject 没被改变，也就等于 bean 了
 				exposedObject = initializeBean(beanName, exposedObject, mbd);
 			}
 		}
@@ -576,11 +581,15 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 						mbd.getResourceDescription(), beanName, "Initialization of bean failed", ex);
 			}
 		}
-
+		// https://mp.weixin.qq.com/s/NUlIzgsJwOSPh8ExSDS1Kw
+		// 依赖关系： beanA -> beanB -> beanA      beanB 注入的就是代理后的 beanA
+		// 存在提前曝光情况下，上面的 initializeBean 里面可能没有生成代理，exposedObject 还是原来的 bean,
+		// 所有需要检查一下，如果对象相等，需要将提前曝光的 aop 代理 bean，替换为 exposedObject
 		if (earlySingletonExposure) {
-			Object earlySingletonReference = getSingleton(beanName, false);
+			Object earlySingletonReference = getSingleton(beanName, false); // 二级缓存，缓存的是经过提前曝光提前Spring AOP代理的bean
 			if (earlySingletonReference != null) {
 				if (exposedObject == bean) {
+					// 将原始 bean 替换为 aop 代理 bean
 					exposedObject = earlySingletonReference;
 				}
 				else if (!this.allowRawInjectionDespiteWrapping && hasDependentBean(beanName)) {
@@ -612,7 +621,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			throw new BeanCreationException(
 					mbd.getResourceDescription(), beanName, "Invalid destruction signature", ex);
 		}
-
+		// 如果存在 aop 代理，则这个是经过代理后的 bean
 		return exposedObject;
 	}
 
@@ -882,6 +891,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	/**
 	 * Obtain a reference for early access to the specified bean,
 	 * typically for the purpose of resolving a circular reference.
+	 *
+	 * 为了解决循环依赖问题，需要提前创建代理对象
+	 *
 	 * @param beanName the name of the bean (for error handling purposes)
 	 * @param mbd the merged bean definition for the bean
 	 * @param bean the raw bean instance
@@ -893,6 +905,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			for (BeanPostProcessor bp : getBeanPostProcessors()) {
 				if (bp instanceof SmartInstantiationAwareBeanPostProcessor) {
 					SmartInstantiationAwareBeanPostProcessor ibp = (SmartInstantiationAwareBeanPostProcessor) bp;
+					// 如果需要代理，这里会返回代理对象；否则返回原始对象
 					exposedObject = ibp.getEarlyBeanReference(exposedObject, beanName);
 					if (exposedObject == null) {
 						return null;

@@ -230,6 +230,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	@Override
 	public Object getEarlyBeanReference(Object bean, String beanName) throws BeansException {
 		Object cacheKey = getCacheKey(bean.getClass(), beanName);
+		// 循环依赖时，记录已被代理的对象，注意是真实的对象，非代理对象
 		this.earlyProxyReferences.put(cacheKey, bean);
 		return wrapIfNecessary(bean, beanName, cacheKey);
 	}
@@ -295,6 +296,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 		if (bean != null) {
 			Object cacheKey = getCacheKey(bean.getClass(), beanName);
+			// 检查是否已经提前创建过代理对象, 如果已经代理过，则不再代理了，那在哪里返回已经代理过的对象呢？
 			if (this.earlyProxyReferences.remove(cacheKey) != bean) {
 				// 包装被代理对象
 				return wrapIfNecessary(bean, beanName, cacheKey);

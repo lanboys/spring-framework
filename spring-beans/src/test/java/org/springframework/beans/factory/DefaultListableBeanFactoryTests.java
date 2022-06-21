@@ -1390,7 +1390,7 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 	/**
-	 *  禁止循环依赖
+	 *  禁止 depend-on 标签 直接 循环依赖
 	 */
 	@Test
 	public void testDependsOnCycle() {
@@ -1413,6 +1413,9 @@ public class DefaultListableBeanFactoryTests {
 		}
 	}
 
+	/**
+	 * 禁止 depend-on 标签 间接 循环依赖
+	 */
 	@Test
 	public void testImplicitDependsOnCycle() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
