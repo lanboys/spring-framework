@@ -7,6 +7,10 @@ public class TimeCountInterceptor implements MethodInterceptor {
 
   @Override
   public Object invoke(MethodInvocation invocation) throws Throwable {
+    if (invocation.getMethod().getName().equals("toString")) {
+      return invocation.proceed();
+    }
+
     long start = System.currentTimeMillis();
     System.out.println(invocation.getMethod().getName() + " 方法调用计时开始...");
     Object proceed = invocation.proceed();

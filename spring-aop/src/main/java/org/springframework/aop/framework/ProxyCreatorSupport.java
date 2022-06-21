@@ -104,7 +104,9 @@ public class ProxyCreatorSupport extends AdvisedSupport {
 		if (!this.active) {
 			activate();
 		}
+		// DefaultAopProxyFactory 是 AopProxyFactory 的唯一实现类，AopProxy 工厂类
 		AopProxyFactory aopProxyFactory = getAopProxyFactory();
+		// aopProxy 里面包装了 jdk 动态代理的 InvocationHandler
 		AopProxy aopProxy = aopProxyFactory.createAopProxy(this);
 		return aopProxy;
 	}

@@ -24,11 +24,15 @@ public class CountInterceptor implements MethodInterceptor {
 
   @Override
   public Object invoke(MethodInvocation invocation) throws Throwable {
+    if (invocation.getMethod().getName().equals("toString")) {
+      return invocation.proceed();
+    }
+
     this.count++;
-    System.out.println(invocation.getMethod().getName() + " 方法调用次数加 1");
+    System.out.println(invocation.getMethod().getName() + " 方法调用次数统计加 1");
     // 可以自己处理各种逻辑
     Object proceed = invocation.proceed();
-    System.out.println(invocation.getMethod().getName() + " 方法调用结束, 返回值: " + proceed);
+    System.out.println(invocation.getMethod().getName() + " 方法调用次数统计介绍, 已经调用次数: " + count);
     return proceed;
   }
 }
