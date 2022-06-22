@@ -935,13 +935,14 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	protected void doDispatch(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		HttpServletRequest processedRequest = request;
-		HandlerExecutionChain mappedHandler = null;
+		// 原先的名称（mappedHandler）取得不好
+		HandlerExecutionChain handlerExecutionChain = null;
 		boolean multipartRequestParsed = false;
 
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
 
 		try {
-			ModelAndView mv = null;
+			ModelAndView modelAndView = null;
 			Exception dispatchException = null;
 
 			try {
@@ -949,23 +950,26 @@ public class DispatcherServlet extends FrameworkServlet {
 				multipartRequestParsed = (processedRequest != request);
 
 				// Determine handler for the current request.
-				// 获取处理器
-				mappedHandler = getHandler(processedRequest);
-				if (mappedHandler == null || mappedHandler.getHandler() == null) {
+				// 获取处理器的 执行链 HandlerExecutionChain
+				handlerExecutionChain = getHandler(processedRequest);
+
+				if (handlerExecutionChain == null || handlerExecutionChain.getHandler() == null) {
 					// 没找到合适的处理器，返回404
 					noHandlerFound(processedRequest, response);
 					return;
 				}
+				// HandlerMethod 对应 Controller 里的方法
+				Object handlerMethod = handlerExecutionChain.getHandler();
 
 				// Determine handler adapter for the current request.
 				// 获取处理器对应的适配器
-				HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
+				HandlerAdapter handlerAdapter = getHandlerAdapter(handlerMethod);
 
 				// Process last-modified header, if supported by the handler.
 				String method = request.getMethod();
 				boolean isGet = "GET".equals(method);
 				if (isGet || "HEAD".equals(method)) {
-					long lastModified = ha.getLastModified(request, mappedHandler.getHandler());
+					long lastModified = handlerAdapter.getLastModified(request, handlerMethod);
 					if (logger.isDebugEnabled()) {
 						logger.debug("Last-Modified value for [" + getRequestUri(request) + "] is: " + lastModified);
 					}
@@ -973,22 +977,22 @@ public class DispatcherServlet extends FrameworkServlet {
 						return;
 					}
 				}
-				// 执行预处理链 返回 true 才能继续往下执行
-				if (!mappedHandler.applyPreHandle(processedRequest, response)) {
+				// 调用执行链【预处理】方法 返回 true 才能继续往下执行
+				if (!handlerExecutionChain.applyPreHandle(processedRequest, response)) {
 					return;
 				}
 
 				// Actually invoke the handler.
-				// 适配出 ModelAndView
-				mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
+				// 通过适配器 适配出 ModelAndView
+				modelAndView = handlerAdapter.handle(processedRequest, response, handlerMethod);
 
 				if (asyncManager.isConcurrentHandlingStarted()) {
 					return;
 				}
 				// 没有视图的时候 设置默认的视图
-				applyDefaultViewName(processedRequest, mv);
-				// 执行后处理链
-				mappedHandler.applyPostHandle(processedRequest, response, mv);
+				applyDefaultViewName(processedRequest, modelAndView);
+				// 调用执行链【后处理】方法
+				handlerExecutionChain.applyPostHandle(processedRequest, response, modelAndView);
 			}
 			catch (Exception ex) {
 				dispatchException = ex;
@@ -998,21 +1002,21 @@ public class DispatcherServlet extends FrameworkServlet {
 				// making them available for @ExceptionHandler methods and other scenarios.
 				dispatchException = new NestedServletException("Handler dispatch failed", err);
 			}
-			// 处理返回的结果，比如处理异常、渲染view
-			processDispatchResult(processedRequest, response, mappedHandler, mv, dispatchException);
+			// 处理返回的结果，比如处理异常、渲染视图view
+			processDispatchResult(processedRequest, response, handlerExecutionChain, modelAndView, dispatchException);
 		}
 		catch (Exception ex) {
-			triggerAfterCompletion(processedRequest, response, mappedHandler, ex);
+			triggerAfterCompletion(processedRequest, response, handlerExecutionChain, ex);
 		}
 		catch (Throwable err) {
-			triggerAfterCompletion(processedRequest, response, mappedHandler,
+			triggerAfterCompletion(processedRequest, response, handlerExecutionChain,
 					new NestedServletException("Handler processing failed", err));
 		}
 		finally {
 			if (asyncManager.isConcurrentHandlingStarted()) {
 				// Instead of postHandle and afterCompletion
-				if (mappedHandler != null) {
-					mappedHandler.applyAfterConcurrentHandlingStarted(processedRequest, response);
+				if (handlerExecutionChain != null) {
+					handlerExecutionChain.applyAfterConcurrentHandlingStarted(processedRequest, response);
 				}
 			}
 			else {

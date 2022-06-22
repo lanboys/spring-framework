@@ -170,6 +170,9 @@ import static org.junit.Assert.fail;
  */
 public class ServletAnnotationControllerHandlerMethodTests extends AbstractServletHandlerMethodTests {
 
+	/**
+	 * spring-mvc 调试入口
+	 */
 	@Test
 	public void emptyValueMapping() throws Exception {
 		initServletWithControllers(ControllerWithEmptyValueMapping.class);

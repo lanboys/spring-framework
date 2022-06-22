@@ -420,13 +420,14 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 		// 我们经常配置的拦截器就是这种
 		for (HandlerInterceptor interceptor : this.adaptedInterceptors) {
 			if (interceptor instanceof MappedInterceptor) {
+				// 这个拦截器的包装类，可以配置拦截什么 url 和不拦截什么 url
 				MappedInterceptor mappedInterceptor = (MappedInterceptor) interceptor;
 				if (mappedInterceptor.matches(lookupPath, this.pathMatcher)) {
 					chain.addInterceptor(mappedInterceptor.getInterceptor());
 				}
 			}
 			else {
-				// 添加拦截器
+				// 添加拦截器 会拦截所有 url 如果要单独对某个 url 进行拦截 需要手动处理
 				chain.addInterceptor(interceptor);
 			}
 		}
