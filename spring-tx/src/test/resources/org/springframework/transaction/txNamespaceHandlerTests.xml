@@ -8,6 +8,7 @@
 				http://www.springframework.org/schema/tx https://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
 
 	<aop:config>
+		<!-- 解析成 DefaultBeanFactoryPointcutAdvisor 对象 -->
 		<aop:advisor pointcut="execution(* *..ITestBean.*(..))" advice-ref="txAdvice"/>
 	</aop:config>
 
