@@ -1,8 +1,8 @@
-package org.springframework.aop.bing.interceptor;
+package org.springframework.aop.bing.aspect;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 
-public class TxInterceptor {
+public class TxAspect {
 
   public void begin() {
     System.out.println("begin(): 开启事务");

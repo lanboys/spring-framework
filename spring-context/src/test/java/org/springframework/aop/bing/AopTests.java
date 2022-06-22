@@ -1,6 +1,7 @@
 package org.springframework.aop.bing;
 
 import org.junit.Test;
+import org.springframework.aop.bing.service.CatService;
 import org.springframework.aop.bing.service.DogService;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -34,5 +35,10 @@ public class AopTests {
     BeanFactory beanFactory = new ClassPathXmlApplicationContext("AopTests.xml", AopTests.class);
     DogService dog = (DogService) beanFactory.getBean("dog");
     dog.run();
+
+    System.out.println("testAop(): =================");
+
+    CatService cat = (CatService) beanFactory.getBean("cat");
+    cat.go();
   }
 }

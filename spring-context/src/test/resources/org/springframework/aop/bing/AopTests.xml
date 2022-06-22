@@ -9,30 +9,48 @@
         <property name="name" value="小黄"/>
     </bean>
 
-    <bean id="txInterceptor" class="org.springframework.aop.bing.interceptor.TxInterceptor">
+    <bean id="cat" class="org.springframework.aop.bing.Cat">
+        <property name="name" value="小花"/>
     </bean>
 
-    <bean id="getAgeCounter" class="org.springframework.tests.aop.advice.CountingBeforeAdvice"/>
+    <bean id="txAspect" class="org.springframework.aop.bing.aspect.TxAspect">
+    </bean>
+
+    <bean id="invokeTimeAspect"
+          class="org.springframework.aop.bing.aspect.InvokeTimeAspect">
+    </bean>
+
+    <bean id="counterAdvice" class="org.springframework.tests.aop.advice.CountingBeforeAdvice"/>
 
     <!--<aop:aspectj-autoproxy proxy-target-class="true"/>-->
 
     <aop:config>
-        <!-- 切点 -->
-        <aop:pointcut id="servicePointcut"
-                      expression="execution(* org.springframework.aop.bing.service.*.*(..))"/>
+        <!-- 切点 1 -->
+        <aop:pointcut id="catServicePointcut"
+                      expression="execution(* org.springframework.aop.bing.service.CatService.*(..))"/>
+
+        <!-- 切点 2 -->
+        <aop:pointcut id="dogServicePointcut"
+                      expression="execution(* org.springframework.aop.bing.service.DogService.*(..))"/>
 
         <!-- Advisor的另一种配置方式-->
-        <!--<aop:advisor advice-ref="getAgeCounter" pointcut-ref="servicePointcut"/>-->
+        <!--<aop:advisor advice-ref="counterAdvice" pointcut-ref="servicePointcut"/>-->
 
-        <!-- 切面 -->
-        <aop:aspect ref="txInterceptor">
+        <!-- 第一个切面  -->
+        <aop:aspect ref="txAspect">
+
+            <!-- 内部也可以定义切点 -->
+            <aop:pointcut id="xxx"
+                          expression="execution(* org.springframework.aop.bing.service.CatService.*(..))"/>
+
             <!-- 通知 -->
-            <!-- 每一个 通知 都会解析生成一个 AspectJPointcutAdvisor 对象 -->
+            <!-- 每一个 通知 都会解析生成一个 AspectJPointcutAdvisor 对象, 最后转化为一个拦截器，拦截器再调用 txAspect 对应的方法 -->
             <!-- 之前 -->
-            <aop:before method="begin" pointcut-ref="servicePointcut"/>
+            <aop:before method="begin" pointcut-ref="catServicePointcut"/>
+
 
             <!-- 正常结束之后 -->
-            <aop:after-returning method="commit" pointcut-ref="servicePointcut"/>
+            <aop:after-returning method="commit" pointcut-ref="dogServicePointcut"/>
 
             <!-- 抛异常 -->
             <!--<aop:after-throwing method="rollback" pointcut-ref="servicePointcut"-->
@@ -43,6 +61,18 @@
 
             <!-- 环绕通知  替代上面所有 -->
             <!--<aop:around method="around" pointcut-ref="servicePointcut"/>-->
+        </aop:aspect>
+
+        <!-- 第二个切面 -->
+        <aop:aspect ref="invokeTimeAspect">
+            <!-- 之前 -->
+            <aop:before method="invokeStart" pointcut-ref="dogServicePointcut"/>
+
+            <!-- 正常结束之后 -->
+            <aop:after-returning method="invokeEnd" pointcut-ref="dogServicePointcut"/>
+
+            <aop:after-returning method="invokeEnd" pointcut-ref="catServicePointcut"/>
+
         </aop:aspect>
     </aop:config>
 

@@ -449,6 +449,7 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 					Object advice;
 					if (this.singleton || this.beanFactory.isSingleton(name)) {
 						// Add the real Advisor/Advice to the chain.
+						// 根据配置的拦截器名字从 Spring 容器中获取拦截器 bean
 						advice = this.beanFactory.getBean(name);
 					}
 					else {
@@ -534,7 +535,8 @@ public class ProxyFactoryBean extends ProxyCreatorSupport
 	private void addAdvisorOnChainCreation(Object next) {
 		// We need to convert to an Advisor if necessary so that our source reference
 		// matches what we find from superclass interceptors.
-		addAdvisor(namedBeanToAdvisor(next));
+		Advisor advisor = namedBeanToAdvisor(next);
+		addAdvisor(advisor);
 	}
 
 	/**

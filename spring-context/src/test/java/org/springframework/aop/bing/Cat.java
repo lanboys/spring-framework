@@ -1,15 +1,15 @@
 package org.springframework.aop.bing;
 
-import org.springframework.aop.bing.service.DogService;
+import org.springframework.aop.bing.service.CatService;
 
-public class Dog implements DogService {
+public class Cat implements CatService {
 
   private long age;
   private String name;
 
   @Override
-  public void run() {
-    System.out.println(name + "狗在run...");
+  public void go() {
+    System.out.println(name + "猫在go...");
   }
 
   public long getAge() {
