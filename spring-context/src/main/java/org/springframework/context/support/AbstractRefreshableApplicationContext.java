@@ -61,6 +61,8 @@ import org.springframework.context.ApplicationContextException;
  * @see FileSystemXmlApplicationContext
  * @see org.springframework.context.annotation.AnnotationConfigApplicationContext
  */
+
+// 上面注释提到 可以多次调用 refresh() 方法刷新
 public abstract class AbstractRefreshableApplicationContext extends AbstractApplicationContext {
 
 	private Boolean allowBeanDefinitionOverriding;
@@ -115,6 +117,7 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 	 */
 	@Override
 	protected final void refreshBeanFactory() throws BeansException {
+		// 可以多次刷新调用
 		if (hasBeanFactory()) {
 			destroyBeans();
 			closeBeanFactory();
@@ -123,6 +126,7 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 			DefaultListableBeanFactory beanFactory = createBeanFactory();
 			beanFactory.setSerializationId(getId());
 			customizeBeanFactory(beanFactory);
+			// 扫描 xml 或者 注解，解析成 BeanDefinition
 			loadBeanDefinitions(beanFactory);
 			this.beanFactory = beanFactory;
 		}

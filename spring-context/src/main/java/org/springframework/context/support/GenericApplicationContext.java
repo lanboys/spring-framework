@@ -53,6 +53,7 @@ import org.springframework.util.Assert;
  * this context is available right from the start, to be able to register bean
  * definitions on it. {@link #refresh()} may only be called once.
  *
+ * <p>与其他为每次刷新创建新的内部BeanFactory实例的ApplicationContext实现相比，此上下文的内部BeanFactory从一开始就可用，以便能够在其上注册bean定义。 Refresh()只能被调用一次。
  * <p>Usage example:
  *
  * <pre class="code">
@@ -85,6 +86,7 @@ import org.springframework.util.Assert;
  * @see org.springframework.beans.factory.xml.XmlBeanDefinitionReader
  * @see org.springframework.beans.factory.support.PropertiesBeanDefinitionReader
  */
+// 上面注释提到 只会调用一次 refresh() 方法
 public class GenericApplicationContext extends AbstractApplicationContext implements BeanDefinitionRegistry {
 
 	private final DefaultListableBeanFactory beanFactory;
@@ -255,6 +257,7 @@ public class GenericApplicationContext extends AbstractApplicationContext implem
 	@Override
 	protected final void refreshBeanFactory() throws IllegalStateException {
 		if (!this.refreshed.compareAndSet(false, true)) {
+			// 禁用刷新方法，只允许调用一次 refresh
 			throw new IllegalStateException(
 					"GenericApplicationContext does not support multiple refresh attempts: just call 'refresh' once");
 		}
