@@ -115,7 +115,7 @@ public class HeadersRequestConditionTests {
     MockHttpServletRequest request = new MockHttpServletRequest();
     request.addHeader("foo", "bar");
 
-    // 要求值不一样，匹配成功
+    // 要求值不一样，匹配失败
     assertNull(condition.getMatchingCondition(request));
   }
 

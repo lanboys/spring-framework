@@ -67,7 +67,9 @@ import org.springframework.util.Assert;
  * MyBean myBean = (MyBean) ctx.getBean("myBean");
  * ...</pre>
  *
- * For the typical case of XML bean definitions, simply use
+ * <p> GenericXmlApplicationContext 其实就是将上面 xml 读取的代码封装到内部了，可以直接使用
+ *
+ * <p>For the typical case of XML bean definitions, simply use
  * {@link ClassPathXmlApplicationContext} or {@link FileSystemXmlApplicationContext},
  * which are easier to set up - but less flexible, since you can just use standard
  * resource locations for XML bean definitions, rather than mixing arbitrary bean
