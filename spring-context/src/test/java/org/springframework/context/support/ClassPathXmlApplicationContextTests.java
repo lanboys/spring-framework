@@ -71,7 +71,9 @@ public class ClassPathXmlApplicationContextTests {
 	private static final String ALIAS_FOR_PARENT_CONTEXT = PATH + "aliasForParent.xml";
 	private static final String TEST_PROPERTIES = "test.properties";
 
-
+	/**
+	 * refresh 调试入口
+	 */
 	@Test
 	public void testSingleConfigLocation() {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(FQ_SIMPLE_CONTEXT);
