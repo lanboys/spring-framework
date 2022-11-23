@@ -1,5 +1,9 @@
 buildscript {
 	repositories {
+		maven { url "https://repo.spring.io/plugins-release-local" }
+		maven { url 'https://maven.aliyun.com/repository/public' }
+		maven { url 'https://maven.aliyun.com/repository/spring' }
+		maven { url 'https://maven.aliyun.com/repository/gradle-plugin' }
 		gradlePluginPortal()
 		maven { url "https://repo.spring.io/plugins-release" }
 	}
