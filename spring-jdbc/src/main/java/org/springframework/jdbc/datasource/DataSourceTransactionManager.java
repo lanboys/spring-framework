@@ -267,7 +267,15 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 				if (logger.isDebugEnabled()) {
 					logger.debug("Switching JDBC Connection [" + con + "] to manual commit");
 				}
+				// 1. 手动开启事务，必须要手动提交事务
+				// 2. 不手动开启事务，会自动开启事务，但是是否自动提交事务，取决于数据库的 autocommit 设置
+				// MySQL 默认开启事务自动提交模式，即除了显式的开启事务（BEGIN 或 START TRANSACTION），否则每条 SQL 语句都会被当做一个单独的事务自动执行。
+
+				// 这里属于第二种，所以后面需要把自动提交取消
+				// 如果不加事务注解 @Transactional，那么相当于直接在命令行执行sql，但是sql是否生效，还是要看 autocommit 设置
+
 				// 设置为手动提交
+				logger.info("取消自动提交");
 				con.setAutoCommit(false);
 			}
 
@@ -320,6 +328,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		}
 		try {
 			// 提交事务
+			logger.info("提交事务");
 			con.commit();
 		}
 		catch (SQLException ex) {
@@ -335,6 +344,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			logger.debug("Rolling back JDBC transaction on Connection [" + con + "]");
 		}
 		try {
+			logger.info("回滚事务");
 			con.rollback();
 		}
 		catch (SQLException ex) {
@@ -366,6 +376,8 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		Connection con = txObject.getConnectionHolder().getConnection();
 		try {
 			if (txObject.isMustRestoreAutoCommit()) {
+				// 恢复自动提交
+				logger.info("恢复自动提交");
 				con.setAutoCommit(true);
 			}
 			DataSourceUtils.resetConnectionAfterTransaction(con, txObject.getPreviousIsolationLevel());
