@@ -18,6 +18,7 @@ public class AopTests {
   ClassPathResource resource_proxyFactoryBean = new ClassPathResource(CLASSNAME + "-proxyFactoryBean.xml", getClass());
   ClassPathResource resource = new ClassPathResource(CLASSNAME + ".xml", getClass());
 
+
   @Test
   public void testProxyFactoryBean() {
     BeanFactory beanFactory = new DefaultListableBeanFactory();
@@ -26,6 +27,9 @@ public class AopTests {
     dog.run();
   }
 
+  /**
+   * AOP测试入口
+   */
   @Test
   public void testAop() {
     // 不能直接用 DefaultListableBeanFactory，因为没有注册后置处理器 AspectJAwareAdvisorAutoProxyCreator，无法创建代理对象
