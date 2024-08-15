@@ -61,6 +61,9 @@ public class TxNamespaceHandlerTests {
 		assertTrue("testBean is a proxy", AopUtils.isAopProxy(bean));
 	}
 
+	/**
+	 * tx事务测试入口
+	 */
 	@Test
 	public void invokeTransactional() {
 		ITestBean testBean = getTestBean();
