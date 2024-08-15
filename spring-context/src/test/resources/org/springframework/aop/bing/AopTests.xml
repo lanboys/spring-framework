@@ -20,7 +20,8 @@
           class="org.springframework.aop.bing.aspect.InvokeTimeAspect">
     </bean>
 
-    <bean id="counterAdvice" class="org.springframework.tests.aop.advice.CountingBeforeAdvice"/>
+    <bean id="myMethodBeforeAdvice"
+          class="org.springframework.aop.bing.interceptor.MyMethodBeforeAdvice"/>
 
     <!--<aop:aspectj-autoproxy proxy-target-class="true"/>-->
 
@@ -34,8 +35,9 @@
                       expression="execution(* org.springframework.aop.bing.service.DogService.*(..))"/>
 
         <!-- Advisor的另一种配置方式-->
-        <!--<aop:advisor advice-ref="counterAdvice" pointcut-ref="servicePointcut"/>-->
+        <aop:advisor advice-ref="myMethodBeforeAdvice" pointcut-ref="dogServicePointcut"/>
 
+        <!-- aop:aspect 这里应该也是转换成多个 Advisor，类似上面这种，未来再验证 -->
         <!-- 第一个切面  -->
         <aop:aspect ref="txAspect">
 

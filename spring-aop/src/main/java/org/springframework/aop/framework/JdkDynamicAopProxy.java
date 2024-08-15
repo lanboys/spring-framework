@@ -120,6 +120,11 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 		findDefinedEqualsAndHashCodeMethods(proxiedInterfaces);
 		// JdkDynamicAopProxy 就是一个 InvocationHandler
 		Object proxy = Proxy.newProxyInstance(classLoader, proxiedInterfaces, this);
+		try {
+			logger.info("生成JDK动态代理对象 target: " + this.advised.getTargetSource().getTarget() + ", proxy: " + proxy);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 		return proxy;
 	}
 
@@ -210,6 +215,7 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 			}
 			else {
 				// We need to create a method invocation...
+
 				// 将真正的方法调用逻辑封装到 ReflectiveMethodInvocation
 				invocation = new ReflectiveMethodInvocation(proxy, target, method, args, targetClass, chain);
 				// Proceed to the joinpoint through the interceptor chain.

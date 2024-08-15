@@ -177,6 +177,7 @@ public class ReflectiveMethodInvocation implements ProxyMethodInvocation, Clonea
 		else {
 			// It's an interceptor, so we just invoke it: The pointcut will have
 			// been evaluated statically before this object was constructed.
+
 			// 这是一个在对象构建的时候就已经定义好了的拦截器，比如在 xml 中定义 ProxyFactoryBean 时就定义好了拦截器，不是动态的
 			return ((MethodInterceptor) interceptorOrInterceptionAdvice).invoke(this);
 		}
