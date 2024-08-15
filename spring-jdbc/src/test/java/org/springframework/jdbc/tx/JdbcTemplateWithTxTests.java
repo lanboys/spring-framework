@@ -52,36 +52,49 @@ public class JdbcTemplateWithTxTests {
   public void end() {
     String sql = "select * from T_TEST";
     List<Map<String, Object>> li = jdbcTemplate.queryForList(sql);
-    System.out.println("end(): " + li);
+    System.out.println(Thread.currentThread().getName() + " 数据库最终结果: " + li);
   }
 
-  //NESTED	如果当前存在事务，则创建一个事务作为当前事务的嵌套事务来运行；
+  // 保存点测试1
+  @Test
+  public void savepoint1() {
+    multiTxService.savepoint1();
+  }
+
+  // 保存点测试2
+  @Test
+  public void savepoint2() {
+    multiTxService.savepoint2();
+  }
+
+  // REQUIRED	如果当前存在事务，则加入该事务；如果当前没有事务，则创建一个新的事务
+  @Test
+  public void required() {
+    boolean isExistingTransaction = true;
+    if (isExistingTransaction) {
+      // 主要测试内部事务异常后，会怎么样? 两个事务 ( 其实是同一个事务 ) 是 && 的关系，都成功整个事务才会成功
+      // 外部有异常，肯定会回滚
+      multiTxService.multiRequired(true, true);
+    } else {
+      singleTxService.required(false);
+    }
+  }
+
+  // NESTED	如果当前存在事务，则创建一个事务作为当前事务的嵌套事务来运行；
   //        如果当前没有事务，则该取值等价于 TransactionDefinition.PROPAGATION_REQUIRED
+  //        使用保存点来实现
   @Test
   public void nested() {
     boolean isExistingTransaction = true;
     if (isExistingTransaction) {
-      // 内部事务异常是否影响外部事务 主要看内部事务异常有没有 try catch
+      // 内部事务异常是否影响外部事务? 主要看内部事务异常有没有 try catch
       multiTxService.multiNested(false, true);
     } else {
       singleTxService.nested(false);
     }
   }
 
-  //REQUIRED	如果当前存在事务，则加入该事务；如果当前没有事务，则创建一个新的事务
-  @Test
-  public void required() {
-    boolean isExistingTransaction = true;
-    if (isExistingTransaction) {
-      // 主要测试内部事务异常后，会怎么样? 两个事务( 其实是同一个事务 )是 && 的关系，都成功整个才会成功
-      // 外部有异常，肯定会回滚
-      multiTxService.multiRequired(false, true);
-    } else {
-      singleTxService.required(false);
-    }
-  }
-
-  //REQUIRES_NEW	创建一个新的事务，如果当前存在事务，则把当前事务挂起
+  // REQUIRES_NEW	创建一个新的事务，如果当前存在事务，则把当前事务挂起
   @Test
   public void requiresNew() {
     boolean isExistingTransaction = true;
@@ -93,7 +106,7 @@ public class JdbcTemplateWithTxTests {
     }
   }
 
-  //SUPPORTS	如果当前存在事务，则加入该事务；如果当前没有事务，则以非事务的方式继续运行
+  // SUPPORTS	如果当前存在事务，则加入该事务；如果当前没有事务，则以非事务的方式继续运行
   // 非事务的方式：是指事务管理器不做一些事务操作，但数据库的默认事务还是有的，每条sql都是一个事务，都是一个新连接
   @Test
   public void supports() {
@@ -106,7 +119,7 @@ public class JdbcTemplateWithTxTests {
     }
   }
 
-  //MANDATORY	如果当前存在事务，则加入该事务；如果当前没有事务，则抛出异常
+  // MANDATORY	如果当前存在事务，则加入该事务；如果当前没有事务，则抛出异常
   @Test
   public void mandatory() {
     boolean isExistingTransaction = false;
@@ -118,7 +131,7 @@ public class JdbcTemplateWithTxTests {
     }
   }
 
-  //NOT_SUPPORTED	以非事务方式运行，如果当前存在事务，则把当前事务挂起
+  // NOT_SUPPORTED	以非事务方式运行，如果当前存在事务，则把当前事务挂起
   // 非事务的方式：是指事务管理器不做一些事务操作，但数据库的默认事务还是有的，每条sql都是一个事务，都是一个新连接
   // 跟 REQUIRES_NEW 类似，只不过是根据sql条数来开启自动提交事务
   @Test
@@ -132,7 +145,7 @@ public class JdbcTemplateWithTxTests {
     }
   }
 
-  //NEVER	以非事务方式运行，如果当前存在事务，则抛出异常
+  // NEVER	以非事务方式运行，如果当前存在事务，则抛出异常
   @Test
   public void never() {
     boolean isExistingTransaction = true;
