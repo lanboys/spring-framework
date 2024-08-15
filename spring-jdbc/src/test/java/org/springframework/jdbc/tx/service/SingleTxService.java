@@ -2,6 +2,8 @@ package org.springframework.jdbc.tx.service;
 
 public interface SingleTxService {
 
+  void savepoint(boolean throwException, boolean createAndHoldSavepoint);
+
   void required(boolean throwException);
 
   void supports(boolean throwException);

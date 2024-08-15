@@ -43,18 +43,21 @@ public class CallCountingTransactionManager extends AbstractPlatformTransactionM
 		this.lastDefinition = definition;
 		++begun;
 		++inflight;
+		System.out.println("doBegin(): 开启事务");
 	}
 
 	@Override
 	protected void doCommit(DefaultTransactionStatus status) {
 		++commits;
 		--inflight;
+		System.out.println("doCommit(): 提交事务");
 	}
 
 	@Override
 	protected void doRollback(DefaultTransactionStatus status) {
 		++rollbacks;
 		--inflight;
+		System.out.println("doRollback(): 回滚事务");
 	}
 
 	public void clear() {

@@ -239,6 +239,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		DataSourceTransactionObject txObject = (DataSourceTransactionObject) transaction;
 		Connection con = null;
+		logger.info("即将开启事务，没有执行SQL，自动开启");
 
 		try {
 			if (!txObject.hasConnectionHolder() ||
@@ -328,7 +329,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		}
 		try {
 			// 提交事务
-			logger.info("提交事务");
+			logger.info("正式提交事务");
 			con.commit();
 		}
 		catch (SQLException ex) {
@@ -377,7 +378,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 		try {
 			if (txObject.isMustRestoreAutoCommit()) {
 				// 恢复自动提交
-				logger.info("恢复自动提交");
+				logger.info("恢复自动提交，这个设置会导致未提交的事务提交一次");
 				con.setAutoCommit(true);
 			}
 			DataSourceUtils.resetConnectionAfterTransaction(con, txObject.getPreviousIsolationLevel());

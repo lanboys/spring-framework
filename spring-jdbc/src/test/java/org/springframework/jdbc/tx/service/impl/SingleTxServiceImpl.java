@@ -2,6 +2,9 @@ package org.springframework.jdbc.tx.service.impl;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.tx.service.SingleTxService;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
+import org.springframework.transaction.support.DefaultTransactionStatus;
 
 public class SingleTxServiceImpl implements SingleTxService {
 
@@ -18,6 +21,18 @@ public class SingleTxServiceImpl implements SingleTxService {
     if (throwException) {
       throw new RuntimeException("内部事务异常");
     }
+  }
+
+  @Override
+  public void savepoint(boolean throwException, boolean createAndHoldSavepoint) {
+    if (createAndHoldSavepoint) {
+      // 设置保存点
+      System.out.println("required(): 内部事务 手动设置保存点");
+      DefaultTransactionStatus status = (DefaultTransactionStatus) TransactionAspectSupport.currentTransactionStatus();
+      status.createAndHoldSavepoint();
+    }
+
+    executeSql(throwException);
   }
 
   @Override

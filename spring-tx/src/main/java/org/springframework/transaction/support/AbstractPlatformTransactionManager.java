@@ -482,6 +482,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				// Usually uses JDBC 3.0 savepoints. Never activates Spring synchronization.
 				DefaultTransactionStatus status =
 						prepareTransactionStatus(definition, transaction, false, false, debugEnabled, null);
+				logger.info("创建保存点");
 				status.createAndHoldSavepoint();
 				return status;
 			}
@@ -750,6 +751,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			if (defStatus.isDebug()) {
 				logger.debug("Global transaction is marked as rollback-only but transactional code requested commit");
 			}
+			logger.info("正式提交前，检查被标记 RollbackOnly，需要回滚");
 			processRollback(defStatus);
 			// Throw UnexpectedRollbackException only at outermost transaction boundary
 			// or if explicitly asked to.
@@ -873,19 +875,20 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	private void processRollback(DefaultTransactionStatus status) {
 		try {
 			try {
+				logger.info("开始检查应该回滚整个事务，还是保存点回滚");
 				triggerBeforeCompletion(status);
 				if (status.hasSavepoint()) {
 					if (status.isDebug()) {
 						logger.debug("Rolling back transaction to savepoint");
 					}
-					// 保存点回滚
+					logger.info("保存点回滚");
 					status.rollbackToHeldSavepoint();
 				}
 				else if (status.isNewTransaction()) {
 					if (status.isDebug()) {
 						logger.debug("Initiating transaction rollback");
 					}
-					// 回滚整个事务
+					logger.info("回滚整个事务");
 					doRollback(status);
 				}
 				else if (status.hasTransaction()) {
@@ -894,7 +897,10 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 						if (status.isDebug()) {
 							logger.debug("Participating transaction failed - marking existing transaction as rollback-only");
 						}
-						// 在连接上标记该事务只能回滚，就是 global rollback-only
+						// 在连接上标记该事务只能回滚，就是 global rollback-only，
+						// 1、防止异常被 try catch，外部事务无法感知到有异常，不进行回滚，导致数据不一致
+						// 2、内部事务也没有开启保存点，无法回滚部分事务
+						logger.info("在连接上标记该事务最终只能回滚 rollback-only，但是现在没有回滚动作");
 						doSetRollbackOnly(status);
 					}
 					else {
