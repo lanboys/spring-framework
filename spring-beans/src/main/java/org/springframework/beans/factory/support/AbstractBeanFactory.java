@@ -243,6 +243,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 		// Eagerly check singleton cache for manually registered singletons.
 		// 查找顺序 ：singletonObjects  -->  earlySingletonObjects  -->  singletonFactories
+		// 会从缓存中获取
 		Object sharedInstance = getSingleton(beanName);
 		if (sharedInstance != null && args == null) {
 			if (logger.isDebugEnabled()) {
@@ -335,6 +336,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 							}
 						}
 					});
+					// bean 此时已经注入好参数
 					bean = getObjectForBeanInstance(sharedInstance, name, beanName, mbd);
 				}
 

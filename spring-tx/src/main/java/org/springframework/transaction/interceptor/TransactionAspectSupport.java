@@ -546,6 +546,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			if (txInfo.transactionAttribute.rollbackOn(ex)) {
 				try {
 					// 回滚
+					logger.info("抛异常了，符合 rollback-for 回滚规则，开始回滚");
 					txInfo.getTransactionManager().rollback(txInfo.getTransactionStatus());
 				}
 				catch (TransactionSystemException ex2) {
@@ -567,6 +568,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 				// Will still roll back if TransactionStatus.isRollbackOnly() is true.
 				try {
 					// 继续提交
+					logger.info("抛异常了，但是不符合 rollback-for 回滚规则，继续提交");
 					txInfo.getTransactionManager().commit(txInfo.getTransactionStatus());
 				}
 				catch (TransactionSystemException ex2) {

@@ -203,6 +203,8 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 				if (singletonObject == null && allowEarlyReference) {
 					ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);// 三级缓存
 					if (singletonFactory != null) {
+						// 这一步，如果对象是AOP 代理的，会提前创建代理对象，所以搞了一个二级缓存把创建的代理对象放进去，
+						// 免得第二次调用又创建一次，比如：a 依赖 b 和 c , b 和 c 也循环依赖 a ,  b 从三级缓存拿到 a, c 从二级缓存拿到 a
 						singletonObject = singletonFactory.getObject();
 						this.earlySingletonObjects.put(beanName, singletonObject); // 放入二级缓存
 						this.singletonFactories.remove(beanName);

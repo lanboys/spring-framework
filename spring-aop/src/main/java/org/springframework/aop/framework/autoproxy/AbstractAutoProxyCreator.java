@@ -255,7 +255,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 		// Suppresses unnecessary default instantiation of the target bean:
 		// The TargetSource will handle target instances in a custom fashion.
 
-		// 自定义的 TargetSource, 在这里创建代理对象
+		// 自定义的 TargetSource, 在这里创建代理对象，就不再走 spring 的 bean 创建流程了
 		if (beanName != null) {
 			TargetSource targetSource = getCustomTargetSource(beanClass, beanName);
 			if (targetSource != null) {
@@ -272,6 +272,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 
 	@Override
 	public boolean postProcessAfterInstantiation(Object bean, String beanName) {
+		// 实例化后
 		return true;
 	}
 
@@ -284,6 +285,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 
 	@Override
 	public Object postProcessBeforeInitialization(Object bean, String beanName) {
+		// 创建对象后  初始化前
 		return bean;
 	}
 
@@ -294,6 +296,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 */
 	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+		// 创建对象后  初始化后
 		if (bean != null) {
 			Object cacheKey = getCacheKey(bean.getClass(), beanName);
 			// 检查是否已经提前创建过代理对象, 如果已经代理过，则不再代理了，那在哪里返回已经代理过的对象呢？

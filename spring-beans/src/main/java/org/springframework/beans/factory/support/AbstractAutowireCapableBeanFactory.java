@@ -482,7 +482,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			throw new BeanCreationException(mbdToUse.getResourceDescription(), beanName,
 					"BeanPostProcessor before instantiation of bean failed", ex);
 		}
-
+		// 继续实例化
 		Object beanInstance = doCreateBean(beanName, mbdToUse, args);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Finished creating instance of bean '" + beanName + "'");
@@ -536,7 +536,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		// Eagerly cache singletons to be able to resolve circular references
 		// even when triggered by lifecycle interfaces like BeanFactoryAware.
-		// 单例 、允许循环依赖、正在创建的单例   才可以提前暴露
+		// 单例、允许循环依赖、正在创建的单例   才可以提前暴露
 		boolean earlySingletonExposure = (mbd.isSingleton() && this.allowCircularReferences &&
 				isSingletonCurrentlyInCreation(beanName));
 		if (earlySingletonExposure) {
@@ -551,8 +551,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			addSingletonFactory(beanName, new ObjectFactory<Object>() {
 				@Override
 				public Object getObject() throws BeansException {
-					// 这里的bean其实在前面已经创建好了
-					// 注意这里不是直接返回已经创建好的原始的 Bean ，如果创建的 Bean是有代理的，那么注入的就应该是代理 Bean，而不是原始的 Bean
+					// 这里的原始 Bean 其实在前面已经创建好了
+					// 注意这里不是直接返回已经创建好的原始的 Bean，如果创建的 Bean 是有代理的，那么注入的就应该是代理 Bean，而不是原始的 Bean
+					// 查看 AbstractAutoProxyCreator，发现通常代理对象是在 bean 后置处理器的 postProcessAfterInitialization 方法创建的，
 					Object earlyBeanReference = getEarlyBeanReference(beanName, mbd, bean);
 					return earlyBeanReference;
 				}
@@ -906,6 +907,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				if (bp instanceof SmartInstantiationAwareBeanPostProcessor) {
 					SmartInstantiationAwareBeanPostProcessor ibp = (SmartInstantiationAwareBeanPostProcessor) bp;
 					// 如果需要代理，这里会返回代理对象；否则返回原始对象
+					// 实现类：AbstractAutoProxyCreator
 					exposedObject = ibp.getEarlyBeanReference(exposedObject, beanName);
 					if (exposedObject == null) {
 						return null;
@@ -1656,7 +1658,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					beanName, "Invocation of init method failed", ex);
 		}
 		if (mbd == null || !mbd.isSynthetic()) {
-			// 初始化后调用
+			// 初始化后调用 如果是AOP代理，返回的是代理对象
 			wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
 		}
 		return wrappedBean;
