@@ -506,7 +506,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	@Override
 	public void refresh() throws BeansException, IllegalStateException {
-		// 容器启动入口
+		// 容器启动入口 refresh
 		synchronized (this.startupShutdownMonitor) {
 			// Prepare this context for refreshing.
 			prepareRefresh();

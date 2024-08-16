@@ -72,7 +72,7 @@ public class ClassPathXmlApplicationContextTests {
 	private static final String TEST_PROPERTIES = "test.properties";
 
 	/**
-	 * refresh 调试入口
+	 *  容器 refresh 调试入口
 	 */
 	@Test
 	public void testSingleConfigLocation() {
