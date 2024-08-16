@@ -175,6 +175,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	 */
 	@Test
 	public void emptyValueMapping() throws Exception {
+		// 初始化 servlet
 		initServletWithControllers(ControllerWithEmptyValueMapping.class);
 
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
