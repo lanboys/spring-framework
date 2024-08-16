@@ -120,7 +120,11 @@ public class TxNamespaceHandlerTests {
 	}
 
 	/**
-	 * 异常事务回滚规则 测试
+	 * 异常事务回滚规则 测试入口
+	 *
+	 * 一句话：根据异常类的继承关系（像一颗树结构），选出与当前异常最接近的异常规则，如果配置为回滚就回滚，不回滚就就继续提交
+	 *
+	 * 看image文件夹的图，非常好理解
 	 */
 	@Test
 	public void rollbackRules() {
