@@ -207,7 +207,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 
 						// 能不能把三级缓存去掉，如果要去掉，【那对象就必须提前创建代理对象，放到二级缓存，没有循环依赖的对象也提前创建了】，这就跟下面这个方法相违背了，
 						// 查看 AbstractAutoProxyCreator，发现通常代理对象是在 bean 后置处理器的 postProcessAfterInitialization 方法创建的
-						// 所以，【加上三级缓存，在必要的时候才提前创建代理对象】，
+						// 所以，【加上三级缓存，在必要的时候才提前创建代理对象】
 
 						// 还有一个好处，比如：a 依赖 b 和 c , b 和 c 也循环依赖 a ,  b 从三级缓存拿到 a, c 从二级缓存拿到 a
 						singletonObject = singletonFactory.getObject();

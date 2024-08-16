@@ -213,6 +213,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 				}
 				if (beanType != null && isHandler(beanType)) {
 					// 检测 handler methods
+					System.out.println("检测到被 @Controller / @RequestMapping 标记的 bean :" + beanName);
 					detectHandlerMethods(beanName);
 				}
 			}
@@ -249,6 +250,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		for (Map.Entry<Method, T> entry : methods.entrySet()) {
 			Method invocableMethod = AopUtils.selectInvocableMethod(entry.getKey(), userType);
 			T mapping = entry.getValue();
+
+			System.out.println("检测到被 @RequestMapping 标记的方法，一个方法对应一个 RequestMappingInfo: " + invocableMethod.getName());
 			registerHandlerMethod(handler, invocableMethod, mapping);
 		}
 	}
@@ -314,6 +317,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		this.mappingRegistry.acquireReadLock();
 		try {
 			HandlerMethod handlerMethod = lookupHandlerMethod(lookupPath, request);
+			System.out.println("在 mappingRegistry 里面，根据路径查找 handlerMethod ："+lookupPath);
 			if (logger.isDebugEnabled()) {
 				if (handlerMethod != null) {
 					logger.debug("Returning handler method [" + handlerMethod + "]");

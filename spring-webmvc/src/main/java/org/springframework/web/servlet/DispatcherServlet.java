@@ -584,6 +584,7 @@ public class DispatcherServlet extends FrameworkServlet {
 			// 找到所有 HandlerMappings 包含 parent BeanFactory
 			Map<String, HandlerMapping> matchingBeans =
 					BeanFactoryUtils.beansOfTypeIncludingAncestors(context, HandlerMapping.class, true, false);
+			System.out.println("检测所有的 handlerMappings，常见的接口只是其中一种，RequestMappingHandlerMapping");
 			if (!matchingBeans.isEmpty()) {
 				this.handlerMappings = new ArrayList<HandlerMapping>(matchingBeans.values());
 				// We keep HandlerMappings in sorted order.

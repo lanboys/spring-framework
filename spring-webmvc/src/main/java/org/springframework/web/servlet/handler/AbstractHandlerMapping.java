@@ -348,10 +348,16 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @param request current HTTP request
 	 * @return the corresponding handler instance, or the default handler
 	 * @see #getHandlerInternal
+	 *
+	 * 这个方法名取得 太不好了，容易混淆
 	 */
 	@Override
 	public final HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
+
 		Object handler = getHandlerInternal(request);
+		// SimpleUrlHandlerMapping  这里返回的可能就是 HandlerExecutionChain
+		// 如：org.springframework.web.servlet.handler.AbstractUrlHandlerMapping.buildPathExposingHandler
+
 		if (handler == null) {
 			handler = getDefaultHandler();
 		}
@@ -413,6 +419,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @see #getAdaptedInterceptors()
 	 */
 	protected HandlerExecutionChain getHandlerExecutionChain(Object handler, HttpServletRequest request) {
+
 		HandlerExecutionChain chain = (handler instanceof HandlerExecutionChain ?
 				(HandlerExecutionChain) handler : new HandlerExecutionChain(handler));
 

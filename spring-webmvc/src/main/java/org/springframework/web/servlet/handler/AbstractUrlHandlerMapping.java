@@ -134,6 +134,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 				}
 				validateHandler(rawHandler, request);
 				handler = buildPathExposingHandler(rawHandler, lookupPath, lookupPath, null);
+				// 这里返回的就是 HandlerExecutionChain
 			}
 		}
 		if (handler != null && logger.isDebugEnabled()) {

@@ -544,7 +544,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				logger.debug("Eagerly caching bean '" + beanName +
 						"' to allow for resolving potential circular references");
 			}
-			// 这里的目的是将bean缓存到 singletonFactories , 方便循环依赖的时候，后者拿到前者，比如 a b 相互依赖，
+			// 这里的目的是将bean添加到三级缓存 singletonFactories , 方便循环依赖的时候，后者拿到前者，比如 a b 相互依赖，
 			// a 实例化后，需要解析字段进行注入，这时发现依赖了 b，查找 b ，如果找不到，那么对 b 进行实例化，b 也
 			// 需要解析字段，发现依赖了 a，此时查找 a ，这时候就可以在缓存 singletonFactories 找到 a ，此时 b 创建成功
 			// 不过 b 依赖的 a 现在还没注入参数成功，b 创建成功后，a 也解析完成，创建成功
@@ -553,7 +553,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				public Object getObject() throws BeansException {
 					// 这里的原始 Bean 其实在前面已经创建好了
 					// 注意这里不是直接返回已经创建好的原始的 Bean，如果创建的 Bean 是有代理的，那么注入的就应该是代理 Bean，而不是原始的 Bean
-					// 查看 AbstractAutoProxyCreator，发现通常代理对象是在 bean 后置处理器的 postProcessAfterInitialization 方法创建的，
+					// 查看 AbstractAutoProxyCreator，发现通常代理对象是在 bean 后置处理器的 postProcessAfterInitialization 方法创建的
 					Object earlyBeanReference = getEarlyBeanReference(beanName, mbd, bean);
 					return earlyBeanReference;
 				}
@@ -563,13 +563,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// Initialize the bean instance.
 		Object exposedObject = bean; // bean： 原始的 bean
 		try {
-			// 依赖注入
+			// 依赖注入，循环依赖的对象，这里就会开始递归了
 			populateBean(beanName, mbd, instanceWrapper);
 			if (exposedObject != null) {
 				// 初始化bean, 调用各种初始化方法：PostConstruct -> afterPropertiesSet -> customInitMethod
 
 				// 如果存在 aop 代理，并且有循环依赖，那么 bean == exposedObject 可能会相等，因为循环依赖已经提前生成代理了
-				// 主要是因为 exposedObject 如果提前代理过，就会跳过 Spring AOP 代理，所以 exposedObject 没被改变，也就等于 bean 了
+				// 主要是因为 exposedObject 如果提前代理过，下面方法就会跳过 Spring AOP 代理，所以 exposedObject 没被改变，也就等于 bean 了
 				exposedObject = initializeBean(beanName, exposedObject, mbd);
 			}
 		}
