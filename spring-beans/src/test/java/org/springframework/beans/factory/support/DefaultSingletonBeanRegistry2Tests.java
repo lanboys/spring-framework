@@ -7,7 +7,7 @@ import org.springframework.beans.factory.ObjectFactory;
 public class DefaultSingletonBeanRegistry2Tests {
 
   /**
-   *  测试怎么解决循环依赖
+   *  模拟测试 怎么解决循环依赖
    *
    *  模拟 AbstractBeanFactory # doGetBean ，注意方法名，都是一一对应
    *
