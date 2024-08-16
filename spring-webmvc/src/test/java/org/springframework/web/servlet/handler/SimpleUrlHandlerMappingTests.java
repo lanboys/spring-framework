@@ -83,7 +83,9 @@ public class SimpleUrlHandlerMappingTests {
   }
 
   /**
-   * 非 RequestMappingHandlerMapping 测试入口
+   * 非 RequestMappingHandlerMapping
+   *
+   * SimpleUrlHandlerMapping 测试入口
    */
   @Test
   public void testNewlineInRequest() throws Exception {
