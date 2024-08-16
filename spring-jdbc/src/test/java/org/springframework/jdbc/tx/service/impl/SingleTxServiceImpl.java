@@ -19,6 +19,7 @@ public class SingleTxServiceImpl implements SingleTxService {
     jdbcTemplate.execute(sql);
 
     if (throwException) {
+      System.out.println("executeSql(): 即将发生内部事务异常");
       throw new RuntimeException("内部事务异常");
     }
   }
@@ -67,6 +68,14 @@ public class SingleTxServiceImpl implements SingleTxService {
 
   @Override
   public void nested(boolean throwException) {
+    executeSql(throwException);
+  }
+
+  /**
+   * 内部事务不标记
+   */
+  @Override
+  public void noTransaction(boolean throwException) {
     executeSql(throwException);
   }
 }

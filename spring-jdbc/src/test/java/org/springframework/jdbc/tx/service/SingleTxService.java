@@ -17,4 +17,7 @@ public interface SingleTxService {
   void never(boolean throwException);
 
   void nested(boolean throwException);
+
+  public void noTransaction(boolean throwException);
+
 }

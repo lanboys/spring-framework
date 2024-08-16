@@ -368,6 +368,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		// No existing transaction found -> check propagation behavior to find out how to proceed.
 		if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_MANDATORY) {
 			//MANDATORY	如果当前存在事务，则加入该事务；如果当前没有事务，则抛出异常
+			logger.warn("PROPAGATION_MANDATORY 如果当前存在事务，则加入该事务；如果当前没有事务，则抛出异常");
 			throw new IllegalTransactionStateException(
 					"No existing transaction found for transaction marked with propagation 'mandatory'");
 		}
@@ -378,6 +379,8 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			//REQUIRES_NEW	创建一个新的事务，如果当前存在事务，则把当前事务挂起
 			//NESTED	如果当前存在事务，则创建一个事务作为当前事务的嵌套事务来运行；如果当前没有事务，
 			//        则该取值等价于 TransactionDefinition.PROPAGATION_REQUIRED
+
+			logger.info("REQUIRED REQUIRES_NEW NESTED 当前没有事务，创建一个事务");
 			SuspendedResourcesHolder suspendedResources = suspend(null);
 			if (debugEnabled) {
 				logger.debug("Creating new transaction with name [" + definition.getName() + "]: " + definition);
@@ -424,6 +427,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			throws TransactionException {
 		// NEVER	以非事务方式运行，如果当前存在事务，则抛出异常
 		if (definition.getPropagationBehavior() == TransactionDefinition.PROPAGATION_NEVER) {
+			logger.info("PROPAGATION_NEVER 以非事务方式运行，如果当前存在事务，则抛出异常");
 			throw new IllegalTransactionStateException(
 					"Existing transaction found for transaction marked with propagation 'never'");
 		}
@@ -436,6 +440,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 			Object suspendedResources = suspend(transaction);
 			boolean newSynchronization = (getTransactionSynchronization() == SYNCHRONIZATION_ALWAYS);
 			//以非事务方式运行
+			logger.info("PROPAGATION_NOT_SUPPORTED 以非事务方式运行, 把当前事务挂起");
 			return prepareTransactionStatus(
 					definition, null, false, newSynchronization, debugEnabled, suspendedResources);
 		}
@@ -452,6 +457,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				//创建一个新的事务
 				DefaultTransactionStatus status = newTransactionStatus(
 						definition, transaction, true, newSynchronization, debugEnabled, suspendedResources);
+				logger.info("PROPAGATION_REQUIRES_NEW 创建一个新的事务，如果当前存在事务，则把当前事务挂起");
 				doBegin(transaction, definition);
 				prepareSynchronization(status, definition);
 				return status;
@@ -477,6 +483,8 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				logger.debug("Creating nested transaction with name [" + definition.getName() + "]");
 			}
 			if (useSavepointForNestedTransaction()) {
+				// 支持保存点的走这里
+				logger.info("如果当前存在事务，则利用保存点创建一个事务作为当前事务的嵌套事务来运行；如果当前没有事务，创建一个新事务");
 				// Create savepoint within existing Spring-managed transaction,
 				// through the SavepointManager API implemented by TransactionStatus.
 				// Usually uses JDBC 3.0 savepoints. Never activates Spring synchronization.
@@ -490,6 +498,8 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				// Nested transaction through nested begin and commit/rollback calls.
 				// Usually only for JTA: Spring synchronization might get activated here
 				// in case of a pre-existing JTA transaction.
+
+				// 有点类似 REQUIRES_NEW，只是没有挂起，暂时不了解这个用法
 				boolean newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
 				DefaultTransactionStatus status = newTransactionStatus(
 						definition, transaction, true, newSynchronization, debugEnabled, null);
@@ -526,6 +536,8 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 		// SUPPORTS	如果当前存在事务，则加入该事务；如果当前没有事务，则以非事务的方式继续运行
 		// MANDATORY	如果当前存在事务，则加入该事务；如果当前没有事务，则抛出异常
 		boolean newSynchronization = (getTransactionSynchronization() != SYNCHRONIZATION_NEVER);
+
+		logger.info("REQUIRED SUPPORTS MANDATORY 当前存在事务，加入该事务");
 		return prepareTransactionStatus(definition, transaction, false, newSynchronization, debugEnabled, null);
 	}
 
@@ -900,7 +912,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 						// 在连接上标记该事务只能回滚，就是 global rollback-only，
 						// 1、防止异常被 try catch，外部事务无法感知到有异常，不进行回滚，导致数据不一致
 						// 2、内部事务也没有开启保存点，无法回滚部分事务
-						logger.info("在连接上标记该事务最终只能回滚 rollback-only，但是现在没有回滚动作");
+						logger.info("在连接上标记该事务最终只能回滚 rollback-only，但是现在没有回滚动作，没保存点，无法部分回滚");
 						doSetRollbackOnly(status);
 					}
 					else {
@@ -911,6 +923,7 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 				}
 				else {
 					logger.debug("Should roll back transaction but cannot - no transaction available");
+					logger.info("应该要回滚，但是没有事务，直接跳过");
 				}
 			}
 			catch (RuntimeException ex) {

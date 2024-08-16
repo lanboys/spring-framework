@@ -55,29 +55,43 @@ public class JdbcTemplateWithTxTests {
     System.out.println(Thread.currentThread().getName() + " 数据库最终结果: " + li);
   }
 
+  // 内部没有事务，外部有 REQUIRED
+  @Test
+  public void multiInnerNoTransaction() {
+    System.out.println("++++++  外部事务即将开始  ++++++");
+    multiTxService.multiInnerNoTransaction(true, true);
+    System.out.println("++++++  外部事务结束  ++++++");
+  }
+
   // 保存点测试1
   @Test
-  public void savepoint1() {
-    multiTxService.savepoint1();
+  public void multiSavepoint1() {
+    System.out.println("++++++  外部事务即将开始  ++++++");
+    multiTxService.multiSavepoint1();
+    System.out.println("++++++  外部事务结束  ++++++");
   }
 
   // 保存点测试2
   @Test
-  public void savepoint2() {
-    multiTxService.savepoint2();
+  public void multiSavepoint2() {
+    System.out.println("++++++  外部事务即将开始  ++++++");
+    multiTxService.multiSavepoint2();
+    System.out.println("++++++  外部事务结束  ++++++");
   }
 
   // REQUIRED	如果当前存在事务，则加入该事务；如果当前没有事务，则创建一个新的事务
   @Test
   public void required() {
-    boolean isExistingTransaction = true;
-    if (isExistingTransaction) {
+    System.out.println("++++++  外部事务即将开始  ++++++");
+    boolean isMultiTransaction = true;
+    if (isMultiTransaction) {
       // 主要测试内部事务异常后，会怎么样? 两个事务 ( 其实是同一个事务 ) 是 && 的关系，都成功整个事务才会成功
       // 外部有异常，肯定会回滚
       multiTxService.multiRequired(true, true);
     } else {
       singleTxService.required(false);
     }
+    System.out.println("++++++  外部事务结束  ++++++");
   }
 
   // NESTED	如果当前存在事务，则创建一个事务作为当前事务的嵌套事务来运行；
@@ -85,50 +99,59 @@ public class JdbcTemplateWithTxTests {
   //        使用保存点来实现
   @Test
   public void nested() {
-    boolean isExistingTransaction = true;
-    if (isExistingTransaction) {
+    System.out.println("++++++  外部事务即将开始  ++++++");
+    boolean isMultiTransaction = true;
+    if (isMultiTransaction) {
       // 内部事务异常是否影响外部事务? 主要看内部事务异常有没有 try catch
       multiTxService.multiNested(false, true);
     } else {
       singleTxService.nested(false);
     }
+    System.out.println("++++++  外部事务结束  ++++++");
   }
 
   // REQUIRES_NEW	创建一个新的事务，如果当前存在事务，则把当前事务挂起
+  //              用一个新连接来实现
   @Test
   public void requiresNew() {
-    boolean isExistingTransaction = true;
-    if (isExistingTransaction) {
+    System.out.println("++++++  外部事务即将开始  ++++++");
+    boolean isMultiTransaction = true;
+    if (isMultiTransaction) {
       // 内部事务异常是否影响外部事务 主要看内部事务异常有没有 try catch
       multiTxService.multiRequiresNew(true, true);
     } else {
       singleTxService.requiresNew(false);
     }
+    System.out.println("++++++  外部事务结束  ++++++");
   }
 
   // SUPPORTS	如果当前存在事务，则加入该事务；如果当前没有事务，则以非事务的方式继续运行
   // 非事务的方式：是指事务管理器不做一些事务操作，但数据库的默认事务还是有的，每条sql都是一个事务，都是一个新连接
   @Test
   public void supports() {
-    boolean isExistingTransaction = true;
-    if (isExistingTransaction) {
+    System.out.println("++++++  外部事务即将开始  ++++++");
+    boolean isMultiTransaction = true;
+    if (isMultiTransaction) {
       // 异常回滚机制跟required一样，是 && 的关系
       multiTxService.multiSupports(false, true);
     } else {
       singleTxService.supports(false);
     }
+    System.out.println("++++++  外部事务结束  ++++++");
   }
 
   // MANDATORY	如果当前存在事务，则加入该事务；如果当前没有事务，则抛出异常
   @Test
   public void mandatory() {
-    boolean isExistingTransaction = false;
-    if (isExistingTransaction) {
+    System.out.println("++++++  外部事务即将开始  ++++++");
+    boolean isMultiTransaction = true;
+    if (isMultiTransaction) {
       // 异常回滚机制跟required一样，是 && 的关系
-      multiTxService.multiMandatory(false, true);
+      multiTxService.multiMandatory(true, true);
     } else {
       singleTxService.mandatory(false);
     }
+    System.out.println("++++++  外部事务结束  ++++++");
   }
 
   // NOT_SUPPORTED	以非事务方式运行，如果当前存在事务，则把当前事务挂起
@@ -136,24 +159,28 @@ public class JdbcTemplateWithTxTests {
   // 跟 REQUIRES_NEW 类似，只不过是根据sql条数来开启自动提交事务
   @Test
   public void notSupported() {
-    boolean isExistingTransaction = true;
-    if (isExistingTransaction) {
+    System.out.println("++++++  外部事务即将开始  ++++++");
+    boolean isMultiTransaction = true;
+    if (isMultiTransaction) {
       // 跟 requiresNew 类似
-      multiTxService.multiNotSupported(false, true);
+      multiTxService.multiNotSupported(true, true);
     } else {
       singleTxService.notSupported(false);
     }
+    System.out.println("++++++  外部事务结束  ++++++");
   }
 
   // NEVER	以非事务方式运行，如果当前存在事务，则抛出异常
   @Test
   public void never() {
-    boolean isExistingTransaction = true;
-    if (isExistingTransaction) {
+    System.out.println("++++++  外部事务即将开始  ++++++");
+    boolean isMultiTransaction = true;
+    if (isMultiTransaction) {
       // 内部事务在创建事务的时候就抛异常了，还没有机会执行到手动抛异常的地方
       multiTxService.multiNever(false, false);
     } else {
       singleTxService.never(false);
     }
+    System.out.println("++++++  外部事务结束  ++++++");
   }
 }

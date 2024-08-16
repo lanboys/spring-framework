@@ -345,7 +345,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 			logger.debug("Rolling back JDBC transaction on Connection [" + con + "]");
 		}
 		try {
-			logger.info("回滚事务");
+			logger.info("正式回滚事务");
 			con.rollback();
 		}
 		catch (SQLException ex) {

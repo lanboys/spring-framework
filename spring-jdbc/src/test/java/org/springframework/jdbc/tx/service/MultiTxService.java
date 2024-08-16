@@ -2,9 +2,11 @@ package org.springframework.jdbc.tx.service;
 
 public interface MultiTxService {
 
-  void savepoint1();
+  void multiInnerNoTransaction(boolean tryCatch, boolean throwException);
 
-  void savepoint2();
+  void multiSavepoint1();
+
+  void multiSavepoint2();
 
   void multiRequired(boolean tryCatch, boolean throwException);
 
