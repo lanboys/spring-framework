@@ -201,10 +201,15 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 			synchronized (this.singletonObjects) {
 				singletonObject = this.earlySingletonObjects.get(beanName);// 二级缓存
 				if (singletonObject == null && allowEarlyReference) {
-					ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);// 三级缓存
+					ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);// 三级缓存，只有循环依赖才会执行到这里
 					if (singletonFactory != null) {
-						// 这一步，如果对象是AOP 代理的，会提前创建代理对象，所以搞了一个二级缓存把创建的代理对象放进去，
-						// 免得第二次调用又创建一次，比如：a 依赖 b 和 c , b 和 c 也循环依赖 a ,  b 从三级缓存拿到 a, c 从二级缓存拿到 a
+						// 为什么要三级缓存？
+
+						// 能不能把三级缓存去掉，如果要去掉，【那对象就必须提前创建代理对象，放到二级缓存，没有循环依赖的对象也提前创建了】，这就跟下面这个方法相违背了，
+						// 查看 AbstractAutoProxyCreator，发现通常代理对象是在 bean 后置处理器的 postProcessAfterInitialization 方法创建的
+						// 所以，【加上三级缓存，在必要的时候才提前创建代理对象】，
+
+						// 还有一个好处，比如：a 依赖 b 和 c , b 和 c 也循环依赖 a ,  b 从三级缓存拿到 a, c 从二级缓存拿到 a
 						singletonObject = singletonFactory.getObject();
 						this.earlySingletonObjects.put(beanName, singletonObject); // 放入二级缓存
 						this.singletonFactories.remove(beanName);
