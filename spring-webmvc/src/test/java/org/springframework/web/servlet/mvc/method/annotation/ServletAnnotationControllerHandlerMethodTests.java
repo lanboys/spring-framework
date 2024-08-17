@@ -174,11 +174,23 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	 * spring-mvc 调试入口
 	 */
 	@Test
-	public void emptyValueMapping() throws Exception {
+	public void springMvcTest() throws Exception {
 		// 初始化 servlet
 		initServletWithControllers(ControllerWithEmptyValueMapping.class);
 
-		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo/bb");
+		request.setContextPath("/foo");
+		request.setServletPath("");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertEquals("testX", response.getContentAsString());
+	}
+
+	@Test
+	public void emptyValueMapping() throws Exception {
+		initServletWithControllers(ControllerWithEmptyValueMapping.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");//url="", 去掉了contextPath
 		request.setContextPath("/foo");
 		request.setServletPath("");
 		MockHttpServletResponse response = new MockHttpServletResponse();
@@ -1848,17 +1860,29 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	static class ControllerWithEmptyValueMapping {
 
 		@RequestMapping("")
-		public void myPath2(HttpServletResponse response) throws IOException {
+		public void myPath1(HttpServletResponse response) throws IOException {
+			System.out.println("myPath2(): 我要抛异常了");
 			throw new IllegalStateException("test");
 		}
 
 		@RequestMapping("/bar")
-		public void myPath3(HttpServletResponse response) throws IOException {
+		public void myPath2(HttpServletResponse response) throws IOException {
 			response.getWriter().write("testX");
 		}
 
+		@RequestMapping("/aa")
+		public String myPath3(HttpServletResponse response) throws IOException {
+			return "testX";
+		}
+
+		@RequestMapping("/bb")
+		@ResponseBody
+		public String myPath4(HttpServletResponse response) throws IOException {
+			return "testX";
+		}
+
 		@ExceptionHandler
-		public void myPath2(Exception ex, HttpServletResponse response) throws IOException {
+		public void exception(Exception ex, HttpServletResponse response) throws IOException {
 			// 将异常信息返回
 			response.getWriter().write(ex.getMessage());
 		}

@@ -317,7 +317,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		this.mappingRegistry.acquireReadLock();
 		try {
 			HandlerMethod handlerMethod = lookupHandlerMethod(lookupPath, request);
-			System.out.println("在 mappingRegistry 里面，根据路径查找 handlerMethod ："+lookupPath);
+			System.out.println("在 mappingRegistry 里面，根据路径查找 handlerMethod ：" + lookupPath);
 			if (logger.isDebugEnabled()) {
 				if (handlerMethod != null) {
 					logger.debug("Returning handler method [" + handlerMethod + "]");

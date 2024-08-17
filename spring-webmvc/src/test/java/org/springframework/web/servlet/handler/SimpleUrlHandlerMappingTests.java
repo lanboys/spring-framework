@@ -84,7 +84,7 @@ public class SimpleUrlHandlerMappingTests {
 
   /**
    * 非 RequestMappingHandlerMapping
-   *
+   * <p>
    * SimpleUrlHandlerMapping 测试入口
    */
   @Test
@@ -231,7 +231,7 @@ public class SimpleUrlHandlerMappingTests {
     }
   }
 
-  public static class MyHandlerAdapter extends ApplicationObjectSupport implements HandlerAdapter {
+  public static class MyHandlerAdapter implements HandlerAdapter {
 
     @Override
     public boolean supports(Object handler) {
